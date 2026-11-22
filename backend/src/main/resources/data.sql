@@ -1,0 +1,166 @@
+-- ============================================================
+-- StockSim Pro seed data (idempotent inserts)
+-- Runs after Hibernate creates the schema (defer-datasource-initialization=true)
+-- Uses INSERT ... SELECT ... WHERE NOT EXISTS with aliased columns so re-runs
+-- never duplicate rows and MySQL does not complain about derived column names.
+-- ============================================================
+
+-- 20 NSE stocks ---------------------------------------------------------------
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'RELIANCE','Reliance Industries Ltd.','Energy',2847.50,2789.20,2855.00,2788.00,4200000,1925000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='RELIANCE');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'TCS','Tata Consultancy Services','IT',3412.00,3426.30,3440.00,3405.00,1800000,1248000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='TCS');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'INFY','Infosys Ltd.','IT',1589.00,1570.10,1595.00,1565.00,2900000,658000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='INFY');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'HDFCBANK','HDFC Bank Ltd.','Banking',1720.00,1706.40,1728.00,1702.00,3500000,1305000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='HDFCBANK');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'ICICIBANK','ICICI Bank Ltd.','Banking',1024.00,1018.70,1030.00,1015.00,4100000,718000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='ICICIBANK');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'WIPRO','Wipro Ltd.','IT',452.00,466.50,468.00,450.00,2200000,236000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='WIPRO');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'SBIN','State Bank of India','Banking',624.00,618.30,628.00,616.00,5600000,557000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='SBIN');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'TATAMOTORS','Tata Motors Ltd.','Automobile',945.00,906.80,952.00,905.00,6700000,348000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='TATAMOTORS');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'SUNPHARMA','Sun Pharmaceutical Industries','Pharma',1456.00,1416.20,1465.00,1414.00,1500000,349000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='SUNPHARMA');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'BHARTIARTL','Bharti Airtel Ltd.','Telecom',1187.00,1175.40,1192.00,1170.00,2800000,665000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='BHARTIARTL');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'ITC','ITC Ltd.','FMCG',462.00,458.90,465.00,457.00,3900000,577000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='ITC');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'LT','Larsen & Toubro Ltd.','Infrastructure',3654.00,3598.10,3670.00,3590.00,1200000,502000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='LT');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'AXISBANK','Axis Bank Ltd.','Banking',1098.00,1087.60,1105.00,1083.00,3100000,339000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='AXISBANK');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'MARUTI','Maruti Suzuki India Ltd.','Automobile',12450.00,12280.50,12520.00,12250.00,420000,391000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='MARUTI');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'ASIANPAINT','Asian Paints Ltd.','FMCG',2890.00,2912.70,2925.00,2880.00,890000,277000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='ASIANPAINT');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'HCLTECH','HCL Technologies Ltd.','IT',1534.00,1512.30,1542.00,1508.00,1700000,416000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='HCLTECH');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'BAJFINANCE','Bajaj Finance Ltd.','Finance',6789.00,6698.40,6820.00,6680.00,760000,420000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='BAJFINANCE');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'KOTAKBANK','Kotak Mahindra Bank Ltd.','Banking',1745.00,1738.90,1755.00,1732.00,1900000,347000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='KOTAKBANK');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'TITAN','Titan Company Ltd.','FMCG',3321.00,3287.60,3340.00,3280.00,980000,295000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='TITAN');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, created_at, updated_at)
+SELECT 'NTPC','NTPC Ltd.','Energy',362.00,357.80,365.00,356.00,4400000,351000000000.00,TRUE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='NTPC');
+
+-- Demo users ------------------------------------------------------------------
+-- Password for both users is: Password123   (BCrypt strength 12 hash)
+-- Admin: admin@stocksim.local  |  Trader: trader@stocksim.local
+INSERT INTO users (full_name, email, password_hash, role, verified, suspended, totp_enabled, created_at, updated_at)
+SELECT 'Platform Admin','admin@stocksim.local','$2a$12$8ShPoGMKydZthMJfLLPJ6OKJe2Y4BYx4P02mgbRmNs.JTiPwkLyUa','ADMIN',TRUE,FALSE,FALSE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='admin@stocksim.local');
+
+INSERT INTO users (full_name, email, password_hash, role, verified, suspended, totp_enabled, created_at, updated_at)
+SELECT 'Demo Trader','trader@stocksim.local','$2a$12$8ShPoGMKydZthMJfLLPJ6OKJe2Y4BYx4P02mgbRmNs.JTiPwkLyUa','TRADER',TRUE,FALSE,FALSE,NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='trader@stocksim.local');
+
+-- Wallets for demo users (₹1,00,000 starting balance) -------------------------
+INSERT INTO wallets (user_id, balance, buying_power, created_at, updated_at)
+SELECT u.id, 100000.00, 100000.00, NOW(), NOW() FROM users u
+WHERE u.email='admin@stocksim.local'
+  AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
+
+INSERT INTO wallets (user_id, balance, buying_power, created_at, updated_at)
+SELECT u.id, 100000.00, 100000.00, NOW(), NOW() FROM users u
+WHERE u.email='trader@stocksim.local'
+  AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
+
+-- News articles (seeded per stock, with sentiment) ----------------------------
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'Reliance Q3 net profit rises 12% on retail strength',
+       'Reliance Industries reported a 12% YoY jump in quarterly profit driven by its retail and Jio segments.',
+       'POSITIVE', NOW()
+FROM stocks s WHERE s.symbol='RELIANCE'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'Reliance Q3%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'Jio announces nationwide 5G expansion',
+       'Jio will extend 5G coverage to 500 more towns this quarter.',
+       'POSITIVE', NOW()
+FROM stocks s WHERE s.symbol='RELIANCE'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'Jio announces%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'TCS wins multi-year deal with European bank',
+       'Tata Consultancy Services signed a large multi-year digital transformation contract.',
+       'POSITIVE', NOW()
+FROM stocks s WHERE s.symbol='TCS'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'TCS wins%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'IT sector faces margin pressure amid wage hikes',
+       'Analysts flag near-term margin pressure across Indian IT majors.',
+       'NEGATIVE', NOW()
+FROM stocks s WHERE s.symbol='TCS'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'IT sector faces%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'Infosys revises FY guidance upward',
+       'Infosys raised its revenue growth guidance citing a strong deal pipeline.',
+       'POSITIVE', NOW()
+FROM stocks s WHERE s.symbol='INFY'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'Infosys revises%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'Wipro reports flat sequential revenue',
+       'Wipro quarterly revenue was broadly flat, below street expectations.',
+       'NEGATIVE', NOW()
+FROM stocks s WHERE s.symbol='WIPRO'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'Wipro reports%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'HDFC Bank maintains steady deposit growth',
+       'HDFC Bank reported steady deposit growth and stable asset quality.',
+       'NEUTRAL', NOW()
+FROM stocks s WHERE s.symbol='HDFCBANK'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'HDFC Bank maintains%');
+
+INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)
+SELECT s.id, 'Tata Motors EV sales hit record high',
+       'Tata Motors reported record electric vehicle sales for the quarter.',
+       'POSITIVE', NOW()
+FROM stocks s WHERE s.symbol='TATAMOTORS'
+  AND NOT EXISTS (SELECT 1 FROM news_articles n WHERE n.stock_id=s.id AND n.headline LIKE 'Tata Motors EV%');

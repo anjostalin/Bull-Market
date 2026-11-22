@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: stocksim-pro
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:sts_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+    username: ${DB_USER:sts_user}
+    password: ${DB_PASSWORD:sts_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+    open-in-view: false
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+server:
+  port: 8080
+
+sts:
+  jwt:
+    secret: ${JWT_SECRET:Y2hhbmdlLXRoaXMtc2VjcmV0LWtleS1mb3Itc3RvY2tzaW0tcHJvLWZzYWQtcHJvamVjdC0yMDI2LXN1cGVyLWxvbmc=}
+    expiration-ms: 3600000
+  market:
+    open-time: "09:15"
+    close-time: "15:30"
+    enforce-hours: false
+    tick-interval-ms: 5000
+    ohlcv-interval-ms: 15000
+    snapshot-interval-ms: 60000
+  mail:
+    from: no-reply@stocksim.local
+    base-url: http://localhost:5173
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.stocksim.sts: INFO

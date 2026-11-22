@@ -1,0 +1,53 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sts-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: sts_db
+      MYSQL_USER: sts_user
+      MYSQL_PASSWORD: sts_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - sts_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    container_name: sts-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: sts_db
+      DB_USER: sts_user
+      DB_PASSWORD: sts_pass
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: sts-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: sts-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  sts_mysql_data:
