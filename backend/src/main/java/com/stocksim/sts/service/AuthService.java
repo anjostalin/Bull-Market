@@ -58,8 +58,8 @@ public class AuthService {
 
         walletRepository.save(Wallet.builder()
                 .userId(user.getId())
-                .balance(new BigDecimal("100000.00"))
-                .buyingPower(new BigDecimal("100000.00"))
+                .balanceInr(new BigDecimal("100000.00"))
+                .balanceUsd(new BigDecimal("1000.00"))
                 .build());
 
         String token = UUID.randomUUID().toString().replace("-", "");

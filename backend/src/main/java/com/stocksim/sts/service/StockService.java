@@ -18,18 +18,26 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final StockPriceHistoryRepository historyRepository;
+    private final MarketClock marketClock;
 
-    public StockService(StockRepository stockRepository, StockPriceHistoryRepository historyRepository) {
+    public StockService(StockRepository stockRepository, StockPriceHistoryRepository historyRepository,
+                        MarketClock marketClock) {
         this.stockRepository = stockRepository;
         this.historyRepository = historyRepository;
+        this.marketClock = marketClock;
     }
 
-    public Page<StockView> list(String search, Pageable pageable) {
-        Page<Stock> page = (search == null || search.isBlank())
+    public Page<StockView> list(String search, String market, Pageable pageable) {
+        String q = search == null ? "" : search.trim();
+        if (market != null && !market.isBlank()) {
+            Stock.Market m = Stock.Market.valueOf(market.trim().toUpperCase());
+            return stockRepository.searchByMarket(m, q, pageable).map(this::toView);
+        }
+        Page<Stock> page = q.isBlank()
                 ? stockRepository.findByActiveTrue(pageable)
                 : stockRepository
                 .findByActiveTrueAndSymbolContainingIgnoreCaseOrActiveTrueAndCompanyNameContainingIgnoreCase(
-                        search, search, pageable);
+                        q, q, pageable);
         return page.map(this::toView);
     }
 
@@ -55,6 +63,7 @@ public class StockService {
         }
         return new StockView(s.getId(), s.getSymbol(), s.getCompanyName(), s.getSector(),
                 s.getCurrentPrice(), s.getPreviousClose(), s.getDayHigh(), s.getDayLow(),
-                s.getVolume(), changePercent);
+                s.getVolume(), changePercent,
+                s.getMarket().name(), s.getCurrency(), marketClock.isOpen(s.getMarket()));
     }
 }

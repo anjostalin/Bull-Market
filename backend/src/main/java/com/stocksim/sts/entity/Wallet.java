@@ -20,13 +20,13 @@ public class Wallet {
     @Column(nullable = false, unique = true)
     private Long userId;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(precision = 15, scale = 2)
     @Builder.Default
-    private BigDecimal balance = new BigDecimal("100000.00");
+    private BigDecimal balanceInr = new BigDecimal("100000.00");
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(precision = 15, scale = 2)
     @Builder.Default
-    private BigDecimal buyingPower = new BigDecimal("100000.00");
+    private BigDecimal balanceUsd = new BigDecimal("1000.00");
 
     @CreationTimestamp
     @Column(updatable = false)

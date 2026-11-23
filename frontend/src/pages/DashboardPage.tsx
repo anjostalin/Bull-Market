@@ -24,29 +24,33 @@ export default function DashboardPage() {
     v: h.value,
   }));
 
+  // Dashboard cards are INR-focused (the value chart is INR-only by design).
+  const inrSec = summary?.sections.find((s) => s.currency === 'INR');
+  const netWorth = inrSec ? inrSec.walletBalance + inrSec.totalCurrentValue : undefined;
+
   return (
     <div>
-      <h1 className="page-title">Dashboard</h1>
+      <h1 className="page-title">Dashboard <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: 14 }}>· India (₹)</span></h1>
 
       <div className="grid grid-4" style={{ marginBottom: 16 }}>
         <div className="card">
           <div className="stat-label">Net Worth</div>
-          <div className="stat-value">{inr(summary?.netWorth)}</div>
+          <div className="stat-value">{inr(netWorth)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Portfolio Value</div>
-          <div className="stat-value">{inr(summary?.totalCurrentValue)}</div>
-          <div className={`stat-sub ${cls(summary?.totalUnrealizedPnl)}`}>
-            {inr(summary?.totalUnrealizedPnl)} ({pct(summary?.totalUnrealizedPnlPercent)})
+          <div className="stat-value">{inr(inrSec?.totalCurrentValue)}</div>
+          <div className={`stat-sub ${cls(inrSec?.totalUnrealizedPnl)}`}>
+            {inr(inrSec?.totalUnrealizedPnl)} ({pct(inrSec?.totalUnrealizedPnlPercent)})
           </div>
         </div>
         <div className="card">
           <div className="stat-label">Wallet Balance</div>
-          <div className="stat-value">{inr(summary?.walletBalance)}</div>
+          <div className="stat-value">{inr(inrSec?.walletBalance)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Realized P&L</div>
-          <div className={`stat-value ${cls(summary?.totalRealizedPnl)}`}>{inr(summary?.totalRealizedPnl)}</div>
+          <div className={`stat-value ${cls(inrSec?.totalRealizedPnl)}`}>{inr(inrSec?.totalRealizedPnl)}</div>
         </div>
       </div>
 

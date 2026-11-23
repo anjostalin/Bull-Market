@@ -15,7 +15,10 @@ public class StockDtos {
             BigDecimal dayHigh,
             BigDecimal dayLow,
             Long volume,
-            BigDecimal changePercent
+            BigDecimal changePercent,
+            String market,
+            String currency,
+            boolean marketOpen
     ) {}
 
     public record CandleView(
@@ -31,6 +34,7 @@ public class StockDtos {
             Long stockId,
             String symbol,
             BigDecimal price,
-            BigDecimal changePercent
+            BigDecimal changePercent,
+            boolean marketOpen
     ) {}
 }

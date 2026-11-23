@@ -17,7 +17,8 @@ public class PortfolioDtos {
             BigDecimal currentValue,
             BigDecimal unrealizedPnl,
             BigDecimal unrealizedPnlPercent,
-            BigDecimal realizedPnl
+            BigDecimal realizedPnl,
+            String currency
     ) {}
 
     public record AllocationSlice(
@@ -26,16 +27,21 @@ public class PortfolioDtos {
             BigDecimal percent
     ) {}
 
-    public record PortfolioSummary(
+    /** One per-currency section (IN = INR, US = USD). */
+    public record CurrencySummary(
+            String currency,
             BigDecimal totalInvested,
             BigDecimal totalCurrentValue,
             BigDecimal totalUnrealizedPnl,
             BigDecimal totalUnrealizedPnlPercent,
             BigDecimal totalRealizedPnl,
             BigDecimal walletBalance,
-            BigDecimal netWorth,
             List<HoldingView> holdings,
             List<AllocationSlice> allocation
+    ) {}
+
+    public record PortfolioSummary(
+            List<CurrencySummary> sections
     ) {}
 
     public record SnapshotPoint(LocalDateTime time, BigDecimal value) {}

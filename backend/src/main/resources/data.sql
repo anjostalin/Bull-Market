@@ -86,6 +86,71 @@ INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close,
 SELECT 'NTPC','NTPC Ltd.','Energy',362.00,357.80,365.00,356.00,4400000,351000000000.00,TRUE,NOW(),NOW()
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='NTPC');
 
+-- Backfill market metadata for the Indian stocks (columns added after initial seed) -----------
+UPDATE stocks
+SET market = 'IN', currency = 'INR', yahoo_symbol = CONCAT(symbol, '.NS')
+WHERE (market IS NULL OR yahoo_symbol IS NULL)
+  AND symbol IN ('RELIANCE','TCS','INFY','HDFCBANK','ICICIBANK','WIPRO','SBIN','TATAMOTORS',
+                 'SUNPHARMA','BHARTIARTL','ITC','LT','AXISBANK','MARUTI','ASIANPAINT','HCLTECH',
+                 'BAJFINANCE','KOTAKBANK','TITAN','NTPC');
+
+-- US stocks (yahoo_symbol = ticker; prices are placeholders, overwritten by live fetch) --------
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'AAPL','Apple Inc.','Technology',230.00,229.00,232.00,228.00,50000000,3500000000000.00,TRUE,'US','USD','AAPL',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='AAPL');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'MSFT','Microsoft Corp.','Technology',430.00,428.00,433.00,426.00,22000000,3200000000000.00,TRUE,'US','USD','MSFT',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='MSFT');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'GOOGL','Alphabet Inc.','Technology',175.00,173.50,176.50,172.00,25000000,2150000000000.00,TRUE,'US','USD','GOOGL',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='GOOGL');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'AMZN','Amazon.com Inc.','Consumer',185.00,183.00,187.00,182.50,35000000,1950000000000.00,TRUE,'US','USD','AMZN',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='AMZN');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'NVDA','NVIDIA Corp.','Technology',140.00,138.00,142.00,137.00,120000000,3450000000000.00,TRUE,'US','USD','NVDA',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='NVDA');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'META','Meta Platforms Inc.','Technology',560.00,555.00,565.00,552.00,14000000,1420000000000.00,TRUE,'US','USD','META',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='META');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'TSLA','Tesla Inc.','Automobile',250.00,245.00,255.00,244.00,90000000,800000000000.00,TRUE,'US','USD','TSLA',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='TSLA');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'JPM','JPMorgan Chase & Co.','Banking',220.00,218.00,222.00,217.00,9000000,630000000000.00,TRUE,'US','USD','JPM',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='JPM');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'V','Visa Inc.','Finance',290.00,288.00,292.00,287.00,6500000,580000000000.00,TRUE,'US','USD','V',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='V');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'WMT','Walmart Inc.','Retail',85.00,84.00,86.00,83.50,15000000,680000000000.00,TRUE,'US','USD','WMT',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='WMT');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'NFLX','Netflix Inc.','Media',700.00,690.00,710.00,688.00,4000000,300000000000.00,TRUE,'US','USD','NFLX',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='NFLX');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'AMD','Advanced Micro Devices','Technology',165.00,162.00,167.00,161.00,45000000,265000000000.00,TRUE,'US','USD','AMD',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='AMD');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'DIS','The Walt Disney Co.','Media',95.00,94.00,96.50,93.50,10000000,172000000000.00,TRUE,'US','USD','DIS',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='DIS');
+
+INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close, day_high, day_low, volume, market_cap, active, market, currency, yahoo_symbol, created_at, updated_at)
+SELECT 'KO','The Coca-Cola Co.','FMCG',62.00,61.50,62.80,61.20,13000000,267000000000.00,TRUE,'US','USD','KO',NOW(),NOW()
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='KO');
+
 -- Demo users ------------------------------------------------------------------
 -- Password for both users is: Password123   (BCrypt strength 12 hash)
 -- Admin: admin@stocksim.local  |  Trader: trader@stocksim.local
@@ -97,16 +162,20 @@ INSERT INTO users (full_name, email, password_hash, role, verified, suspended, t
 SELECT 'Demo Trader','trader@stocksim.local','$2a$12$8ShPoGMKydZthMJfLLPJ6OKJe2Y4BYx4P02mgbRmNs.JTiPwkLyUa','TRADER',TRUE,FALSE,FALSE,NOW(),NOW()
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='trader@stocksim.local');
 
--- Wallets for demo users (₹1,00,000 starting balance) -------------------------
-INSERT INTO wallets (user_id, balance, buying_power, created_at, updated_at)
-SELECT u.id, 100000.00, 100000.00, NOW(), NOW() FROM users u
+-- Wallets: dual-currency (INR + USD). Seed demo wallets and backfill any pre-existing rows. ---
+INSERT INTO wallets (user_id, balance_inr, balance_usd, created_at, updated_at)
+SELECT u.id, 100000.00, 1000.00, NOW(), NOW() FROM users u
 WHERE u.email='admin@stocksim.local'
   AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
 
-INSERT INTO wallets (user_id, balance, buying_power, created_at, updated_at)
-SELECT u.id, 100000.00, 100000.00, NOW(), NOW() FROM users u
+INSERT INTO wallets (user_id, balance_inr, balance_usd, created_at, updated_at)
+SELECT u.id, 100000.00, 1000.00, NOW(), NOW() FROM users u
 WHERE u.email='trader@stocksim.local'
   AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
+
+-- Backfill any pre-existing wallet rows created before the dual-currency columns existed.
+UPDATE wallets SET balance_inr = 100000.00 WHERE balance_inr IS NULL;
+UPDATE wallets SET balance_usd = 1000.00 WHERE balance_usd IS NULL;
 
 -- News articles (seeded per stock, with sentiment) ----------------------------
 INSERT INTO news_articles (stock_id, headline, body, sentiment, published_at)

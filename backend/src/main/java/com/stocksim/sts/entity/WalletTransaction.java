@@ -33,6 +33,10 @@ public class WalletTransaction {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balanceAfter;
 
+    @Column(length = 4)
+    @Builder.Default
+    private String currency = "INR";
+
     private Long referenceId;
 
     @Column(length = 255)

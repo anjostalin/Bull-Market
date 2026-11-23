@@ -17,6 +17,9 @@ export interface Stock {
   dayLow: number;
   volume: number;
   changePercent: number;
+  market: 'IN' | 'US';
+  currency: string;
+  marketOpen: boolean;
 }
 
 export interface Candle {
@@ -47,8 +50,8 @@ export interface OrderView {
 export interface Wallet {
   id: number;
   userId: number;
-  balance: number;
-  buyingPower: number;
+  balanceInr: number;
+  balanceUsd: number;
 }
 
 export interface WalletTransaction {
@@ -57,6 +60,7 @@ export interface WalletTransaction {
   type: 'DEPOSIT' | 'WITHDRAWAL' | 'BUY' | 'SELL';
   amount: number;
   balanceAfter: number;
+  currency: string;
   note: string;
   createdAt: string;
 }
@@ -73,6 +77,7 @@ export interface HoldingView {
   unrealizedPnl: number;
   unrealizedPnlPercent: number;
   realizedPnl: number;
+  currency: string;
 }
 
 export interface AllocationSlice {
@@ -81,16 +86,20 @@ export interface AllocationSlice {
   percent: number;
 }
 
-export interface PortfolioSummary {
+export interface CurrencySummary {
+  currency: string;
   totalInvested: number;
   totalCurrentValue: number;
   totalUnrealizedPnl: number;
   totalUnrealizedPnlPercent: number;
   totalRealizedPnl: number;
   walletBalance: number;
-  netWorth: number;
   holdings: HoldingView[];
   allocation: AllocationSlice[];
+}
+
+export interface PortfolioSummary {
+  sections: CurrencySummary[];
 }
 
 export interface SnapshotPoint {

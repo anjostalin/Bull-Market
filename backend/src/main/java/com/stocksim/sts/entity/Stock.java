@@ -44,6 +44,19 @@ public class Stock {
     @Column(precision = 18, scale = 2)
     private BigDecimal marketCap;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 4)
+    @Builder.Default
+    private Market market = Market.IN;
+
+    @Column(length = 4)
+    @Builder.Default
+    private String currency = "INR";
+
+    /** Symbol used when fetching a live quote (e.g. "RELIANCE.NS" for NSE, "AAPL" for US). */
+    @Column(length = 24)
+    private String yahooSymbol;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean active = true;
@@ -54,4 +67,6 @@ public class Stock {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public enum Market { IN, US }
 }

@@ -8,6 +8,7 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.stocksim.sts.dto.PortfolioDtos.CurrencySummary;
 import com.stocksim.sts.dto.PortfolioDtos.HoldingView;
 import com.stocksim.sts.dto.PortfolioDtos.PortfolioSummary;
 import com.stocksim.sts.entity.Trade;
@@ -55,33 +56,38 @@ public class ReportService {
             doc.add(new Paragraph("All values are virtual (simulation only).").setFontSize(9).setItalic());
             doc.add(new Paragraph(" "));
 
-            Table summary = new Table(UnitValue.createPercentArray(new float[]{3, 2})).useAllAvailableWidth();
-            summary.addCell(kv("Total Invested")); summary.addCell(val("Rs " + s.totalInvested()));
-            summary.addCell(kv("Current Value")); summary.addCell(val("Rs " + s.totalCurrentValue()));
-            summary.addCell(kv("Unrealized P&L")); summary.addCell(val("Rs " + s.totalUnrealizedPnl() + " (" + s.totalUnrealizedPnlPercent() + "%)"));
-            summary.addCell(kv("Realized P&L")); summary.addCell(val("Rs " + s.totalRealizedPnl()));
-            summary.addCell(kv("Wallet Balance")); summary.addCell(val("Rs " + s.walletBalance()));
-            summary.addCell(kv("Net Worth")); summary.addCell(val("Rs " + s.netWorth()));
-            doc.add(summary);
-            doc.add(new Paragraph(" "));
+            for (CurrencySummary sec : s.sections()) {
+                String sym = sec.currency().equalsIgnoreCase("USD") ? "$" : "Rs ";
+                doc.add(new Paragraph(sec.currency() + " Account").setBold().setFontSize(14));
 
-            doc.add(new Paragraph("Holdings").setBold().setFontSize(13));
-            Table h = new Table(UnitValue.createPercentArray(new float[]{2, 1, 2, 2, 2, 2})).useAllAvailableWidth();
-            for (String head : new String[]{"Stock", "Qty", "Avg Price", "LTP", "Value", "Unrealized P&L"}) {
-                h.addHeaderCell(new Cell().add(new Paragraph(head).setBold().setFontSize(9)));
+                Table summary = new Table(UnitValue.createPercentArray(new float[]{3, 2})).useAllAvailableWidth();
+                summary.addCell(kv("Total Invested")); summary.addCell(val(sym + sec.totalInvested()));
+                summary.addCell(kv("Current Value")); summary.addCell(val(sym + sec.totalCurrentValue()));
+                summary.addCell(kv("Unrealized P&L")); summary.addCell(val(sym + sec.totalUnrealizedPnl() + " (" + sec.totalUnrealizedPnlPercent() + "%)"));
+                summary.addCell(kv("Realized P&L")); summary.addCell(val(sym + sec.totalRealizedPnl()));
+                summary.addCell(kv("Wallet Balance")); summary.addCell(val(sym + sec.walletBalance()));
+                doc.add(summary);
+                doc.add(new Paragraph(" "));
+
+                doc.add(new Paragraph("Holdings").setBold().setFontSize(12));
+                Table h = new Table(UnitValue.createPercentArray(new float[]{2, 1, 2, 2, 2, 2})).useAllAvailableWidth();
+                for (String head : new String[]{"Stock", "Qty", "Avg Price", "LTP", "Value", "Unrealized P&L"}) {
+                    h.addHeaderCell(new Cell().add(new Paragraph(head).setBold().setFontSize(9)));
+                }
+                for (HoldingView v : sec.holdings()) {
+                    h.addCell(cell(v.symbol()));
+                    h.addCell(cell(String.valueOf(v.quantity())));
+                    h.addCell(cell(sym + v.avgBuyPrice()));
+                    h.addCell(cell(sym + v.currentPrice()));
+                    h.addCell(cell(sym + v.currentValue()));
+                    h.addCell(cell(sym + v.unrealizedPnl() + " (" + v.unrealizedPnlPercent() + "%)"));
+                }
+                if (sec.holdings().isEmpty()) {
+                    h.addCell(new Cell(1, 6).add(new Paragraph("No holdings.").setFontSize(9)));
+                }
+                doc.add(h);
+                doc.add(new Paragraph(" "));
             }
-            for (HoldingView v : s.holdings()) {
-                h.addCell(cell(v.symbol()));
-                h.addCell(cell(String.valueOf(v.quantity())));
-                h.addCell(cell("Rs " + v.avgBuyPrice()));
-                h.addCell(cell("Rs " + v.currentPrice()));
-                h.addCell(cell("Rs " + v.currentValue()));
-                h.addCell(cell("Rs " + v.unrealizedPnl() + " (" + v.unrealizedPnlPercent() + "%)"));
-            }
-            if (s.holdings().isEmpty()) {
-                h.addCell(new Cell(1, 6).add(new Paragraph("No holdings.").setFontSize(9)));
-            }
-            doc.add(h);
         } catch (Exception e) {
             throw new ApiException(500, "Failed to generate PDF: " + e.getMessage());
         }

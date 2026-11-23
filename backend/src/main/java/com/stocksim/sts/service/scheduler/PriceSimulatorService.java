@@ -4,6 +4,7 @@ import com.stocksim.sts.dto.StockDtos.PriceUpdate;
 import com.stocksim.sts.entity.Stock;
 import com.stocksim.sts.repository.StockRepository;
 import com.stocksim.sts.service.AlertService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,12 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Simulated market engine. Every tick, each active stock's price takes a bounded random walk
- * (approximately ±0.5% to ±2% per update), matching FR-04 / Section 12.2 of the documentation.
- * After updating, it broadcasts price updates over STOMP (/topic/prices) and runs alert checks.
+ * Legacy random-walk simulator. Superseded by LiveQuoteService (real Yahoo quotes).
+ * Disabled by default; set sts.market.simulate=true to re-enable the synthetic engine
+ * (e.g. for offline work when the live API is unavailable).
  */
 @Component
+@ConditionalOnProperty(name = "sts.market.simulate", havingValue = "true")
 public class PriceSimulatorService {
 
     private final StockRepository stockRepository;
@@ -58,7 +60,7 @@ public class PriceSimulatorService {
                         .divide(stock.getPreviousClose(), 6, RoundingMode.HALF_UP)
                         .multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP);
             }
-            updates.add(new PriceUpdate(stock.getId(), stock.getSymbol(), newPrice, changePercent));
+            updates.add(new PriceUpdate(stock.getId(), stock.getSymbol(), newPrice, changePercent, true));
         }
         stockRepository.saveAll(stocks);
 

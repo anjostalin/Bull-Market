@@ -37,10 +37,11 @@ export const authApi = {
 };
 
 export const stockApi = {
-  list: (search = '', page = 0, size = 50, sortBy = 'symbol') =>
-    api.get<Page<Stock>>('/stocks', { params: { search, page, size, sortBy } }),
+  list: (search = '', page = 0, size = 50, sortBy = 'symbol', market?: 'IN' | 'US') =>
+    api.get<Page<Stock>>('/stocks', { params: { search, page, size, sortBy, market } }),
   get: (id: number) => api.get<Stock>(`/stocks/${id}`),
   history: (id: number) => api.get<Candle[]>(`/stocks/${id}/history`),
+  marketStatus: () => api.get<{ IN: boolean; US: boolean }>('/stocks/market-status'),
 };
 
 export const orderApi = {
@@ -56,8 +57,10 @@ export const walletApi = {
   get: () => api.get<Wallet>('/wallet'),
   transactions: (page = 0, size = 20) =>
     api.get<Page<WalletTransaction>>('/wallet/transactions', { params: { page, size } }),
-  deposit: (amount: number) => api.post<Wallet>('/wallet/deposit', { amount }),
-  withdraw: (amount: number) => api.post<Wallet>('/wallet/withdraw', { amount }),
+  deposit: (amount: number, currency: 'INR' | 'USD' = 'INR') =>
+    api.post<Wallet>('/wallet/deposit', { amount, currency }),
+  withdraw: (amount: number, currency: 'INR' | 'USD' = 'INR') =>
+    api.post<Wallet>('/wallet/withdraw', { amount, currency }),
 };
 
 export const portfolioApi = {

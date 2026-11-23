@@ -29,13 +29,22 @@ public class PortfolioService {
 
     public PortfolioSummary summary(Long userId) {
         List<Holding> holdings = holdingRepository.findByUserId(userId);
+        Wallet wallet = walletService.getByUser(userId);
 
+        List<CurrencySummary> sections = new ArrayList<>();
+        sections.add(buildSection("INR", holdings, wallet.getBalanceInr()));
+        sections.add(buildSection("USD", holdings, wallet.getBalanceUsd()));
+        return new PortfolioSummary(sections);
+    }
+
+    private CurrencySummary buildSection(String currency, List<Holding> allHoldings, BigDecimal cash) {
         List<HoldingView> views = new ArrayList<>();
         BigDecimal totalInvested = BigDecimal.ZERO;
         BigDecimal totalCurrent = BigDecimal.ZERO;
         BigDecimal totalRealized = BigDecimal.ZERO;
 
-        for (Holding h : holdings) {
+        for (Holding h : allHoldings) {
+            if (!currency.equalsIgnoreCase(h.getStock().getCurrency())) continue;
             BigDecimal current = h.getStock().getCurrentPrice();
             BigDecimal qty = BigDecimal.valueOf(h.getQuantity());
             BigDecimal invested = h.getAvgBuyPrice().multiply(qty).setScale(2, RoundingMode.HALF_UP);
@@ -48,7 +57,7 @@ public class PortfolioService {
             views.add(new HoldingView(
                     h.getStock().getId(), h.getStock().getSymbol(), h.getStock().getCompanyName(),
                     h.getQuantity(), h.getAvgBuyPrice(), current, invested, curValue,
-                    unrealized, unrealizedPct, h.getRealizedPnl()));
+                    unrealized, unrealizedPct, h.getRealizedPnl(), currency));
 
             totalInvested = totalInvested.add(invested);
             totalCurrent = totalCurrent.add(curValue);
@@ -68,16 +77,22 @@ public class PortfolioService {
                 : totalUnrealized.divide(totalInvested, 6, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP);
 
-        Wallet wallet = walletService.getByUser(userId);
-        BigDecimal netWorth = totalCurrent.add(wallet.getBalance());
-
-        return new PortfolioSummary(totalInvested, totalCurrent, totalUnrealized, totalUnrealizedPct,
-                totalRealized, wallet.getBalance(), netWorth, views, allocation);
+        return new CurrencySummary(currency, totalInvested, totalCurrent, totalUnrealized,
+                totalUnrealizedPct, totalRealized, cash, views, allocation);
     }
 
-    /** Current total portfolio value (holdings at market + wallet cash). */
+    /**
+     * INR-only net worth (INR holdings at market + INR cash). Feeds the portfolio-value snapshot/chart,
+     * which stays single-currency by design (no cross-currency aggregation).
+     */
     public BigDecimal netWorth(Long userId) {
-        return summary(userId).netWorth();
+        Wallet wallet = walletService.getByUser(userId);
+        BigDecimal inrHoldings = holdingRepository.findByUserId(userId).stream()
+                .filter(h -> "INR".equalsIgnoreCase(h.getStock().getCurrency()))
+                .map(h -> h.getStock().getCurrentPrice().multiply(BigDecimal.valueOf(h.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return inrHoldings.add(wallet.getBalanceInr());
     }
 
     public List<SnapshotPoint> history(Long userId, int days) {

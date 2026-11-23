@@ -34,12 +34,22 @@ public class WalletController {
     }
 
     @PostMapping("/deposit")
-    public Wallet deposit(@RequestBody Map<String, BigDecimal> body) {
-        return walletService.deposit(SecurityUtil.currentUserId(), body.get("amount"));
+    public Wallet deposit(@RequestBody Map<String, Object> body) {
+        return walletService.deposit(SecurityUtil.currentUserId(), amount(body), currency(body));
     }
 
     @PostMapping("/withdraw")
-    public Wallet withdraw(@RequestBody Map<String, BigDecimal> body) {
-        return walletService.withdraw(SecurityUtil.currentUserId(), body.get("amount"));
+    public Wallet withdraw(@RequestBody Map<String, Object> body) {
+        return walletService.withdraw(SecurityUtil.currentUserId(), amount(body), currency(body));
+    }
+
+    private BigDecimal amount(Map<String, Object> body) {
+        Object a = body.get("amount");
+        return a == null ? null : new BigDecimal(a.toString());
+    }
+
+    private String currency(Map<String, Object> body) {
+        Object c = body.get("currency");
+        return c == null ? "INR" : c.toString();
     }
 }

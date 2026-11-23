@@ -28,42 +28,45 @@ public class WalletService {
                 .orElseThrow(() -> ApiException.notFound("Wallet not found"));
     }
 
-    public boolean hasBalance(Long userId, BigDecimal amount) {
-        return getByUser(userId).getBalance().compareTo(amount) >= 0;
+    public boolean hasBalance(Long userId, BigDecimal amount, String currency) {
+        return balanceOf(getByUser(userId), currency).compareTo(amount) >= 0;
     }
 
     @Transactional
-    public void debit(Long userId, BigDecimal amount, WalletTransaction.Type type, Long refId, String note) {
+    public void debit(Long userId, BigDecimal amount, String currency,
+                      WalletTransaction.Type type, Long refId, String note) {
         Wallet wallet = getByUser(userId);
-        if (wallet.getBalance().compareTo(amount) < 0) {
-            throw ApiException.badRequest("Insufficient balance");
+        BigDecimal current = balanceOf(wallet, currency);
+        if (current.compareTo(amount) < 0) {
+            throw ApiException.badRequest("Insufficient " + normalize(currency) + " balance");
         }
-        wallet.setBalance(wallet.getBalance().subtract(amount));
-        wallet.setBuyingPower(wallet.getBalance());
+        BigDecimal updated = current.subtract(amount);
+        setBalance(wallet, currency, updated);
         walletRepository.save(wallet);
-        recordTx(wallet.getId(), type, amount, wallet.getBalance(), refId, note);
+        recordTx(wallet.getId(), type, amount, updated, normalize(currency), refId, note);
     }
 
     @Transactional
-    public void credit(Long userId, BigDecimal amount, WalletTransaction.Type type, Long refId, String note) {
+    public void credit(Long userId, BigDecimal amount, String currency,
+                       WalletTransaction.Type type, Long refId, String note) {
         Wallet wallet = getByUser(userId);
-        wallet.setBalance(wallet.getBalance().add(amount));
-        wallet.setBuyingPower(wallet.getBalance());
+        BigDecimal updated = balanceOf(wallet, currency).add(amount);
+        setBalance(wallet, currency, updated);
         walletRepository.save(wallet);
-        recordTx(wallet.getId(), type, amount, wallet.getBalance(), refId, note);
+        recordTx(wallet.getId(), type, amount, updated, normalize(currency), refId, note);
     }
 
     @Transactional
-    public Wallet deposit(Long userId, BigDecimal amount) {
-        if (amount.signum() <= 0) throw ApiException.badRequest("Amount must be positive");
-        credit(userId, amount, WalletTransaction.Type.DEPOSIT, null, "Manual deposit");
+    public Wallet deposit(Long userId, BigDecimal amount, String currency) {
+        if (amount == null || amount.signum() <= 0) throw ApiException.badRequest("Amount must be positive");
+        credit(userId, amount, currency, WalletTransaction.Type.DEPOSIT, null, "Manual deposit");
         return getByUser(userId);
     }
 
     @Transactional
-    public Wallet withdraw(Long userId, BigDecimal amount) {
-        if (amount.signum() <= 0) throw ApiException.badRequest("Amount must be positive");
-        debit(userId, amount, WalletTransaction.Type.WITHDRAWAL, null, "Manual withdrawal");
+    public Wallet withdraw(Long userId, BigDecimal amount, String currency) {
+        if (amount == null || amount.signum() <= 0) throw ApiException.badRequest("Amount must be positive");
+        debit(userId, amount, currency, WalletTransaction.Type.WITHDRAWAL, null, "Manual withdrawal");
         return getByUser(userId);
     }
 
@@ -72,13 +75,34 @@ public class WalletService {
         return txRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId(), pageable);
     }
 
+    // --- currency helpers ---
+
+    private String normalize(String currency) {
+        if (currency == null) return "INR";
+        String c = currency.trim().toUpperCase();
+        if (!c.equals("INR") && !c.equals("USD")) {
+            throw ApiException.badRequest("Unsupported currency: " + currency);
+        }
+        return c;
+    }
+
+    private BigDecimal balanceOf(Wallet wallet, String currency) {
+        return normalize(currency).equals("USD") ? wallet.getBalanceUsd() : wallet.getBalanceInr();
+    }
+
+    private void setBalance(Wallet wallet, String currency, BigDecimal value) {
+        if (normalize(currency).equals("USD")) wallet.setBalanceUsd(value);
+        else wallet.setBalanceInr(value);
+    }
+
     private void recordTx(Long walletId, WalletTransaction.Type type, BigDecimal amount,
-                          BigDecimal balanceAfter, Long refId, String note) {
+                          BigDecimal balanceAfter, String currency, Long refId, String note) {
         txRepository.save(WalletTransaction.builder()
                 .walletId(walletId)
                 .type(type)
                 .amount(amount)
                 .balanceAfter(balanceAfter)
+                .currency(currency)
                 .referenceId(refId)
                 .note(note)
                 .build());

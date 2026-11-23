@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { createChart, ColorType } from 'lightweight-charts';
 import { alertApi, orderApi, signalApi, stockApi, watchlistApi } from '../services/api';
 import type { Candle, SignalView, Stock, WatchlistView } from '../types';
-import { inr, pct, cls } from '../services/format';
+import { money, pct, cls } from '../services/format';
 import SignalCard from '../components/SignalCard';
 
 export default function StockDetailPage() {
@@ -32,7 +32,7 @@ export default function StockDetailPage() {
     const iv = setInterval(() => {
       stockApi.get(stockId).then((r) => setStock(r.data)).catch(() => {});
       signalApi.get(stockId).then((r) => setSignal(r.data)).catch(() => {});
-    }, 5000);
+    }, 1000);
     return () => clearInterval(iv);
   }, [stockId]);
 
@@ -64,7 +64,7 @@ export default function StockDetailPage() {
         stopPrice: orderType === 'STOP_LOSS' ? Number(stopPrice) : undefined,
       });
       if (data.status === 'REJECTED') setMsg({ ok: false, text: `Rejected: ${data.rejectReason}` });
-      else if (data.status === 'EXECUTED') setMsg({ ok: true, text: `Executed at ${inr(data.executedPrice)}` });
+      else if (data.status === 'EXECUTED') setMsg({ ok: true, text: `Executed at ${money(data.executedPrice, stock?.currency)}` });
       else setMsg({ ok: true, text: `Order ${data.status.toLowerCase()} (will fill when price condition is met)` });
     } catch (err: any) {
       setMsg({ ok: false, text: err.response?.data?.error || 'Order failed' });
@@ -97,7 +97,7 @@ export default function StockDetailPage() {
     const condition = threshold >= stock.currentPrice ? 'ABOVE' : 'BELOW';
     try {
       await alertApi.create(stockId, condition, threshold);
-      setActionMsg(`Alert set: ${condition} ${inr(threshold)}`);
+      setActionMsg(`Alert set: ${condition} ${money(threshold, stock.currency)}`);
     } catch (err: any) {
       setActionMsg(err.response?.data?.error || 'Could not set alert');
     }
@@ -105,19 +105,27 @@ export default function StockDetailPage() {
 
   if (!stock) return <p>Loading…</p>;
   const estTotal = qty * stock.currentPrice;
+  const cur = stock.currency;
+  const closed = !stock.marketOpen;
 
   return (
     <div>
-      <h1 className="page-title">{stock.symbol} — {stock.companyName}</h1>
+      <h1 className="page-title">
+        {stock.symbol} — {stock.companyName}
+        <span className="badge badge-gray" style={{ marginLeft: 10, fontSize: 12, verticalAlign: 'middle' }}>
+          {stock.market === 'US' ? '🇺🇸 US' : '🇮🇳 India'}
+        </span>
+      </h1>
       <div className="grid" style={{ gridTemplateColumns: '2fr 1fr' }}>
         <div>
           <div className="card" style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
-              <div style={{ fontSize: 32, fontWeight: 700 }}>{inr(stock.currentPrice)}</div>
+              <div style={{ fontSize: 32, fontWeight: 700 }}>{money(stock.currentPrice, cur)}</div>
               <div className={cls(stock.changePercent)} style={{ fontSize: 18 }}>{pct(stock.changePercent)}</div>
+              {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>Market closed · frozen</span>}
             </div>
             <div style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 6 }}>
-              Open {inr(stock.previousClose)} · High {inr(stock.dayHigh)} · Low {inr(stock.dayLow)} · Vol {stock.volume.toLocaleString('en-IN')}
+              Prev close {money(stock.previousClose, cur)} · High {money(stock.dayHigh, cur)} · Low {money(stock.dayLow, cur)} · Vol {stock.volume.toLocaleString('en-IN')}
             </div>
           </div>
           <div className="card">
@@ -161,10 +169,16 @@ export default function StockDetailPage() {
             </div>
           )}
           <div style={{ color: 'var(--text-dim)', fontSize: 13, margin: '8px 0 14px' }}>
-            Est. total: <b style={{ color: 'var(--text)' }}>{inr(estTotal)}</b>
+            Est. total: <b style={{ color: 'var(--text)' }}>{money(estTotal, cur)}</b>
           </div>
           {msg && <div className={msg.ok ? 'ok-msg' : 'error-msg'}>{msg.text}</div>}
-          <button className={direction === 'BUY' ? 'btn-green' : 'btn-red'} style={{ width: '100%' }} onClick={placeOrder}>
+          {closed && (
+            <div className="error-msg" style={{ background: 'rgba(243,186,47,0.10)', color: 'var(--yellow)', border: '1px solid rgba(243,186,47,0.30)' }}>
+              {stock.market === 'US' ? 'US' : 'Indian'} market is closed — trading is disabled until it reopens.
+            </div>
+          )}
+          <button className={direction === 'BUY' ? 'btn-green' : 'btn-red'} style={{ width: '100%' }}
+            onClick={placeOrder} disabled={closed}>
             {direction} {stock.symbol}
           </button>
 

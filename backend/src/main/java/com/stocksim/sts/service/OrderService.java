@@ -4,14 +4,13 @@ import com.stocksim.sts.dto.OrderDtos.*;
 import com.stocksim.sts.entity.*;
 import com.stocksim.sts.exception.ApiException;
 import com.stocksim.sts.repository.*;
-import org.springframework.beans.factory.annotation.Value;import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalTime;
 
 @Service
 public class OrderService {
@@ -24,18 +23,13 @@ public class OrderService {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final EmailService emailService;
-
-    @Value("${sts.market.enforce-hours:false}")
-    private boolean enforceHours;
-    @Value("${sts.market.open-time:09:15}")
-    private String openTime;
-    @Value("${sts.market.close-time:15:30}")
-    private String closeTime;
+    private final MarketClock marketClock;
 
     public OrderService(OrderRepository orderRepository, TradeRepository tradeRepository,
                         HoldingRepository holdingRepository, StockRepository stockRepository,
                         WalletService walletService, NotificationService notificationService,
-                        UserRepository userRepository, EmailService emailService) {
+                        UserRepository userRepository, EmailService emailService,
+                        MarketClock marketClock) {
         this.orderRepository = orderRepository;
         this.tradeRepository = tradeRepository;
         this.holdingRepository = holdingRepository;
@@ -44,6 +38,7 @@ public class OrderService {
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.marketClock = marketClock;
     }
 
     @Transactional
@@ -60,8 +55,8 @@ public class OrderService {
         if (req.orderType() == Order.OrderType.STOP_LOSS && req.stopPrice() == null) {
             throw ApiException.badRequest("Stop price required for STOP_LOSS order");
         }
-        if (enforceHours && !withinMarketHours()) {
-            throw ApiException.badRequest("Market is closed (hours " + openTime + "-" + closeTime + " IST)");
+        if (!marketClock.isOpen(stock.getMarket())) {
+            throw ApiException.badRequest(stock.getMarket().name() + " market is closed. Trading is available during market hours.");
         }
 
         Order order = Order.builder()
@@ -93,15 +88,17 @@ public class OrderService {
     public void execute(Order order, BigDecimal executionPrice) {
         int qty = order.getQuantity();
         BigDecimal total = executionPrice.multiply(BigDecimal.valueOf(qty)).setScale(2, RoundingMode.HALF_UP);
+        String cur = order.getStock().getCurrency();
+        String sym = cur != null && cur.equalsIgnoreCase("USD") ? "$" : "₹";
 
         if (order.getDirection() == Order.Direction.BUY) {
-            if (!order.isPaper() && !walletService.hasBalance(order.getUserId(), total)) {
-                reject(order, "Insufficient wallet balance");
+            if (!order.isPaper() && !walletService.hasBalance(order.getUserId(), total, cur)) {
+                reject(order, "Insufficient " + cur + " wallet balance");
                 return;
             }
             applyBuyHolding(order, executionPrice, qty);
             if (!order.isPaper()) {
-                walletService.debit(order.getUserId(), total, WalletTransaction.Type.BUY, order.getId(),
+                walletService.debit(order.getUserId(), total, cur, WalletTransaction.Type.BUY, order.getId(),
                         "BUY " + qty + " " + order.getStock().getSymbol());
             }
         } else { // SELL
@@ -113,7 +110,7 @@ public class OrderService {
             }
             applySellHolding(holding, executionPrice, qty);
             if (!order.isPaper()) {
-                walletService.credit(order.getUserId(), total, WalletTransaction.Type.SELL, order.getId(),
+                walletService.credit(order.getUserId(), total, cur, WalletTransaction.Type.SELL, order.getId(),
                         "SELL " + qty + " " + order.getStock().getSymbol());
             }
         }
@@ -134,8 +131,8 @@ public class OrderService {
                 .build());
 
         if (!order.isPaper()) {
-            String msg = String.format("%s %d %s @ ₹%s executed (total ₹%s)",
-                    order.getDirection().name(), qty, order.getStock().getSymbol(), executionPrice, total);
+            String msg = String.format("%s %d %s @ %s%s executed (total %s%s)",
+                    order.getDirection().name(), qty, order.getStock().getSymbol(), sym, executionPrice, sym, total);
             notificationService.create(order.getUserId(), Notification.Type.ORDER_EXECUTED, msg);
             userRepository.findById(order.getUserId())
                     .ifPresent(u -> emailService.sendOrderExecuted(u.getEmail(), msg));
@@ -206,10 +203,5 @@ public class OrderService {
                 o.getOrderType().name(), o.getDirection().name(), o.getQuantity(),
                 o.getLimitPrice(), o.getStopPrice(), o.getExecutedPrice(),
                 o.getStatus().name(), o.isPaper(), o.getRejectReason(), o.getCreatedAt());
-    }
-
-    private boolean withinMarketHours() {
-        LocalTime now = LocalTime.now();
-        return !now.isBefore(LocalTime.parse(openTime)) && !now.isAfter(LocalTime.parse(closeTime));
     }
 }
