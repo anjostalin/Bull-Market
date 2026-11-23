@@ -8,6 +8,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   server: {
+    host: true,          // bind to 0.0.0.0 so other devices on the LAN can reach the dev server
     port: 5173,
     proxy: {
       '/api': { target: 'http://localhost:8080', changeOrigin: true },

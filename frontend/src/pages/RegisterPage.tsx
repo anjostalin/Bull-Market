@@ -2,14 +2,32 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../services/api';
 
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+// Password requirement checks (must mirror the backend rules).
+const pwChecks = (p: string) => [
+  { label: 'At least 8 characters', ok: p.length >= 8 },
+  { label: 'An uppercase letter (A–Z)', ok: /[A-Z]/.test(p) },
+  { label: 'A lowercase letter (a–z)', ok: /[a-z]/.test(p) },
+  { label: 'A number (0–9)', ok: /\d/.test(p) },
+  { label: 'A special character (!@#$…)', ok: /[^A-Za-z0-9]/.test(p) },
+];
+
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [pwFocused, setPwFocused] = useState(false);
   const [error, setError] = useState('');
   const [ok, setOk] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const emailValid = EMAIL_RE.test(email);
+  const checks = pwChecks(password);
+  const pwValid = checks.every((c) => c.ok);
+  const canSubmit = fullName.trim().length > 0 && emailValid && pwValid && !loading;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,24 +110,39 @@ export default function RegisterPage() {
               <label htmlFor="reg-email">Email</label>
               <div className="auth2-input">
                 <span className="lead">✉</span>
-                <input id="reg-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                <input id="reg-email" type="email" value={email}
+                  onChange={(e) => setEmail(e.target.value)} onBlur={() => setEmailTouched(true)}
                   placeholder="you@example.com" required />
               </div>
+              {emailTouched && email.length > 0 && !emailValid && (
+                <div className="field-hint err">Enter a valid email address (e.g. you@example.com)</div>
+              )}
             </div>
 
             <div className="auth2-field">
-              <label htmlFor="reg-password">Password <span style={{ color: 'var(--text-dim)', fontWeight: 400 }}>(min 6 chars)</span></label>
+              <label htmlFor="reg-password">Password</label>
               <div className="auth2-input">
                 <span className="lead">🔒</span>
                 <input id="reg-password" type={showPw ? 'text' : 'password'} value={password}
-                  onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setPwFocused(true)}
+                  placeholder="••••••••" required />
                 <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)}>
                   {showPw ? 'HIDE' : 'SHOW'}
                 </button>
               </div>
+              {(pwFocused || password.length > 0) && (
+                <ul className="pw-checklist">
+                  {checks.map((c) => (
+                    <li key={c.label} className={c.ok ? 'met' : ''}>
+                      <span className="pw-dot">{c.ok ? '✓' : '○'}</span>{c.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            <button type="submit" className="auth2-btn" disabled={loading}>
+            <button type="submit" className="auth2-btn" disabled={!canSubmit}>
               {loading ? 'Creating…' : 'Create Account'}
             </button>
           </form>

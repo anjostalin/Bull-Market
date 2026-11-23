@@ -50,18 +50,36 @@ export default function StockDetailPage() {
     }
   };
 
-  const addToWatchlist = async () => {
+  const [wlOpen, setWlOpen] = useState(false);
+  const [newWlName, setNewWlName] = useState('');
+
+  const openWatchlistPicker = () => {
+    watchlistApi.list().then((r) => setWatchlists(r.data)).catch(() => {});
+    setWlOpen(true);
+  };
+
+  const addToWatchlist = async (watchlistId: number, name: string) => {
     try {
-      let wl = watchlists[0];
-      if (!wl) {
-        const { data } = await watchlistApi.create('My Watchlist');
-        wl = data;
-      }
-      await watchlistApi.addItem(wl.id, stockId);
-      toast.success(`${stock?.symbol} added to "${wl.name}"`);
-      watchlistApi.list().then((r) => setWatchlists(r.data)).catch(() => {});
+      await watchlistApi.addItem(watchlistId, stockId);
+      toast.success(`${stock?.symbol} added to "${name}"`);
+      setWlOpen(false);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Could not add to watchlist');
+    }
+  };
+
+  const createAndAdd = async () => {
+    const name = newWlName.trim();
+    if (!name) { toast.error('Enter a watchlist name'); return; }
+    try {
+      const { data } = await watchlistApi.create(name);
+      await watchlistApi.addItem(data.id, stockId);
+      toast.success(`${stock?.symbol} added to "${data.name}"`);
+      setNewWlName('');
+      setWlOpen(false);
+      watchlistApi.list().then((r) => setWatchlists(r.data)).catch(() => {});
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Could not create watchlist');
     }
   };
 
@@ -181,11 +199,41 @@ export default function StockDetailPage() {
           </button>
 
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button className="btn-ghost" style={{ flex: 1 }} onClick={addToWatchlist}>+ Watchlist</button>
+            <button className="btn-ghost" style={{ flex: 1 }} onClick={openWatchlistPicker}>+ Watchlist</button>
             <button className="btn-ghost" style={{ flex: 1 }} onClick={setAlert}>Set Alert</button>
           </div>
         </div>
       </div>
+
+      {wlOpen && (
+        <div className="modal-overlay" onClick={() => setWlOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>Add {stock.symbol} to watchlist</h3>
+              <button className="modal-close" onClick={() => setWlOpen(false)}>✕</button>
+            </div>
+
+            {watchlists.length > 0 && (
+              <div className="wl-list">
+                {watchlists.map((wl) => (
+                  <button key={wl.id} className="wl-option" onClick={() => addToWatchlist(wl.id, wl.name)}>
+                    <span>⭐ {wl.name}</span>
+                    <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>{wl.items.length} stocks</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="modal-divider"><span>or create a new one</span></div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input placeholder="New watchlist name…" value={newWlName}
+                onChange={(e) => setNewWlName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') createAndAdd(); }} />
+              <button className="btn-primary" onClick={createAndAdd}>Create &amp; add</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

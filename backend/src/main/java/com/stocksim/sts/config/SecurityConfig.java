@@ -64,7 +64,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://localhost"));
+        // Allow localhost and any device on the local network (LAN demo over Wi-Fi).
+        // Origin *patterns* (not plain origins) are required to combine wildcards with credentials.
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*", "http://127.0.0.1:*",
+                "http://192.168.*:*", "http://10.*:*", "http://172.*:*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

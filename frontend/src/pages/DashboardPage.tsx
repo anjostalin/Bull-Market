@@ -31,45 +31,55 @@ export default function DashboardPage() {
     v: h.value,
   }));
 
-  // Dashboard cards are INR-focused (the value chart is INR-only by design).
   const inrSec = summary?.sections.find((s) => s.currency === 'INR');
-  const netWorth = inrSec ? inrSec.walletBalance + inrSec.totalCurrentValue : undefined;
+  const usdSec = summary?.sections.find((s) => s.currency === 'USD');
   const firstName = user?.fullName?.split(/\s+/)[0] ?? 'Trader';
+
+  // One stat row per currency (India ₹ and US $) so both portfolios are visible.
+  const row = (sec: typeof inrSec, cur: 'INR' | 'USD', flag: string, label: string) => {
+    const netWorth = sec ? sec.walletBalance + sec.totalCurrentValue : undefined;
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-dim)', margin: '4px 2px 10px' }}>{flag} {label}</div>
+        <div className="grid grid-4">
+          <div className="card">
+            <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Net Worth</div><div className="stat-ic">💰</div></div>
+            <div className="stat-value">{money(netWorth, cur)}</div>
+          </div>
+          <div className="card">
+            <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Holdings Value</div><div className="stat-ic g">📈</div></div>
+            <div className="stat-value">{money(sec?.totalCurrentValue, cur)}</div>
+            <div className={`stat-sub ${cls(sec?.totalUnrealizedPnl)}`}>
+              {money(sec?.totalUnrealizedPnl, cur)} ({pct(sec?.totalUnrealizedPnlPercent)})
+            </div>
+          </div>
+          <div className="card">
+            <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Wallet Balance</div><div className="stat-ic y">👛</div></div>
+            <div className="stat-value">{money(sec?.walletBalance, cur)}</div>
+          </div>
+          <div className="card">
+            <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Realized P&L</div>
+              <div className={`stat-ic ${(sec?.totalRealizedPnl ?? 0) < 0 ? 'r' : 'g'}`}>{(sec?.totalRealizedPnl ?? 0) < 0 ? '📉' : '✅'}</div></div>
+            <div className={`stat-value ${cls(sec?.totalRealizedPnl)}`}>{money(sec?.totalRealizedPnl, cur)}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
       <h1 className="page-title">
         Welcome back, {firstName} 👋
-        <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: 14 }}> · India (₹)</span>
       </h1>
 
-      <div className="grid grid-4" style={{ marginBottom: 16 }}>
-        <div className="card">
-          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Net Worth</div><div className="stat-ic">💰</div></div>
-          <div className="stat-value">{inr(netWorth)}</div>
-        </div>
-        <div className="card">
-          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Portfolio Value</div><div className="stat-ic g">📈</div></div>
-          <div className="stat-value">{inr(inrSec?.totalCurrentValue)}</div>
-          <div className={`stat-sub ${cls(inrSec?.totalUnrealizedPnl)}`}>
-            {inr(inrSec?.totalUnrealizedPnl)} ({pct(inrSec?.totalUnrealizedPnlPercent)})
-          </div>
-        </div>
-        <div className="card">
-          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Wallet Balance</div><div className="stat-ic y">👛</div></div>
-          <div className="stat-value">{inr(inrSec?.walletBalance)}</div>
-        </div>
-        <div className="card">
-          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Realized P&L</div>
-            <div className={`stat-ic ${(inrSec?.totalRealizedPnl ?? 0) < 0 ? 'r' : 'g'}`}>{(inrSec?.totalRealizedPnl ?? 0) < 0 ? '📉' : '✅'}</div></div>
-          <div className={`stat-value ${cls(inrSec?.totalRealizedPnl)}`}>{inr(inrSec?.totalRealizedPnl)}</div>
-        </div>
-      </div>
+      {row(inrSec, 'INR', '🇮🇳', 'India (₹)')}
+      {row(usdSec, 'USD', '🇺🇸', 'US ($)')}
 
-      <div className="grid grid-2">
+      <div className="grid grid-2" style={{ marginTop: 16 }}>
         <div className="card">
           <div className="section-head"><h3>Portfolio Value</h3>
-            <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>₹ · recent</span></div>
+            <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>🇮🇳 India (₹) · recent</span></div>
           {chartData.length > 1 ? (
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={chartData}>
