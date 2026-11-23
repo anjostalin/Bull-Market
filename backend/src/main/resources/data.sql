@@ -151,26 +151,17 @@ INSERT INTO stocks (symbol, company_name, sector, current_price, previous_close,
 SELECT 'KO','The Coca-Cola Co.','FMCG',62.00,61.50,62.80,61.20,13000000,267000000000.00,TRUE,'US','USD','KO',NOW(),NOW()
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM stocks WHERE symbol='KO');
 
--- Demo users ------------------------------------------------------------------
--- Password for both users is: Password123   (BCrypt strength 12 hash)
--- Admin: admin@stocksim.local  |  Trader: trader@stocksim.local
+-- Demo account ----------------------------------------------------------------
+-- One pre-verified ADMIN account for demoing the admin panel (password: Password123).
+-- Regular traders register live (new accounts verify by email via MailHog).
 INSERT INTO users (full_name, email, password_hash, role, verified, suspended, totp_enabled, created_at, updated_at)
 SELECT 'Platform Admin','admin@stocksim.local','$2a$12$8ShPoGMKydZthMJfLLPJ6OKJe2Y4BYx4P02mgbRmNs.JTiPwkLyUa','ADMIN',TRUE,FALSE,FALSE,NOW(),NOW()
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='admin@stocksim.local');
 
-INSERT INTO users (full_name, email, password_hash, role, verified, suspended, totp_enabled, created_at, updated_at)
-SELECT 'Demo Trader','trader@stocksim.local','$2a$12$8ShPoGMKydZthMJfLLPJ6OKJe2Y4BYx4P02mgbRmNs.JTiPwkLyUa','TRADER',TRUE,FALSE,FALSE,NOW(),NOW()
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='trader@stocksim.local');
-
--- Wallets: dual-currency (INR + USD). Seed demo wallets and backfill any pre-existing rows. ---
+-- Wallet for the admin account (dual-currency INR + USD). -----------------------
 INSERT INTO wallets (user_id, balance_inr, balance_usd, created_at, updated_at)
 SELECT u.id, 100000.00, 1000.00, NOW(), NOW() FROM users u
 WHERE u.email='admin@stocksim.local'
-  AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
-
-INSERT INTO wallets (user_id, balance_inr, balance_usd, created_at, updated_at)
-SELECT u.id, 100000.00, 1000.00, NOW(), NOW() FROM users u
-WHERE u.email='trader@stocksim.local'
   AND NOT EXISTS (SELECT 1 FROM wallets w WHERE w.user_id = u.id);
 
 -- Backfill any pre-existing wallet rows created before the dual-currency columns existed.

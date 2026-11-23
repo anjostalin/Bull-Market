@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
 
 const links = [
@@ -21,6 +22,7 @@ function initials(name?: string): string {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -49,6 +51,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <header className="topbar">
           <div />
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button className="theme-toggle" onClick={toggle} title="Toggle theme" aria-label="Toggle theme">
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
             <NotificationBell />
             <div className="user-chip">
               <span style={{ fontSize: 14 }}>{user?.fullName}</span>

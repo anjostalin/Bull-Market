@@ -58,11 +58,14 @@ npm install
 npm run dev     # http://localhost:5173 (proxies /api and /ws to :8080)
 ```
 
-## Demo accounts
+## Demo account
+
+A single pre-verified admin account is seeded for demoing the admin panel. Regular
+traders register live — new accounts verify by email (captured in MailHog at
+http://localhost:8025 during development).
 
 | Role   | Email                   | Password    |
 |--------|-------------------------|-------------|
-| Trader | trader@stocksim.local   | Password123 |
 | Admin  | admin@stocksim.local    | Password123 |
 
 ## Project structure

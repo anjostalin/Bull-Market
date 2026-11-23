@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 import { walletApi } from '../services/api';
 import type { Wallet, WalletTransaction } from '../types';
 import { money } from '../services/format';
+import { useToast } from '../context/ToastContext';
 
 const typeBadge: Record<string, string> = {
   DEPOSIT: 'badge-green', SELL: 'badge-green', WITHDRAWAL: 'badge-red', BUY: 'badge-blue',
 };
 
 export default function WalletPage() {
+  const toast = useToast();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [txns, setTxns] = useState<WalletTransaction[]>([]);
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
-  const [msg, setMsg] = useState('');
 
   const load = () => {
     walletApi.get().then((r) => setWallet(r.data)).catch(() => {});
@@ -20,12 +21,17 @@ export default function WalletPage() {
   };
   useEffect(() => { load(); }, []);
 
-  const act = async (fn: (n: number, c: 'INR' | 'USD') => Promise<any>) => {
-    setMsg('');
+  const act = async (fn: (n: number, c: 'INR' | 'USD') => Promise<any>, verb: string) => {
     const n = Number(amount);
-    if (!n || n <= 0) { setMsg('Enter a positive amount'); return; }
-    try { await fn(n, currency); setAmount(''); load(); }
-    catch (err: any) { setMsg(err.response?.data?.error || 'Failed'); }
+    if (!n || n <= 0) { toast.error('Enter a positive amount'); return; }
+    try {
+      await fn(n, currency);
+      toast.success(`${verb} ${money(n, currency)} successful`);
+      setAmount('');
+      load();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || `${verb} failed`);
+    }
   };
 
   return (
@@ -51,10 +57,9 @@ export default function WalletPage() {
             <option value="USD">$ USD</option>
           </select>
           <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ maxWidth: 200 }} />
-          <button className="btn-green" onClick={() => act(walletApi.deposit)}>Deposit</button>
-          <button className="btn-red" onClick={() => act(walletApi.withdraw)}>Withdraw</button>
+          <button className="btn-green" onClick={() => act(walletApi.deposit, 'Deposit')}>Deposit</button>
+          <button className="btn-red" onClick={() => act(walletApi.withdraw, 'Withdraw')}>Withdraw</button>
         </div>
-        {msg && <div className="error-msg" style={{ marginTop: 12 }}>{msg}</div>}
       </div>
 
       <div className="card" style={{ padding: 0 }}>

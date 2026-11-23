@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { createChart, ColorType } from 'lightweight-charts';
 import { alertApi, orderApi, signalApi, stockApi, watchlistApi } from '../services/api';
 import type { Candle, SignalView, Stock, WatchlistView } from '../types';
 import { money, pct, cls } from '../services/format';
+import { useToast } from '../context/ToastContext';
 import SignalCard from '../components/SignalCard';
+import PriceChart from '../components/PriceChart';
 
 export default function StockDetailPage() {
   const { id } = useParams();
   const stockId = Number(id);
+  const toast = useToast();
   const [stock, setStock] = useState<Stock | null>(null);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [signal, setSignal] = useState<SignalView | null>(null);
   const [watchlists, setWatchlists] = useState<WatchlistView[]>([]);
-  const [actionMsg, setActionMsg] = useState('');
-  const chartRef = useRef<HTMLDivElement>(null);
 
   // order form
   const [direction, setDirection] = useState<'BUY' | 'SELL'>('BUY');
@@ -22,7 +22,6 @@ export default function StockDetailPage() {
   const [qty, setQty] = useState(1);
   const [limitPrice, setLimitPrice] = useState('');
   const [stopPrice, setStopPrice] = useState('');
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     stockApi.get(stockId).then((r) => setStock(r.data)).catch(() => {});
@@ -36,43 +35,22 @@ export default function StockDetailPage() {
     return () => clearInterval(iv);
   }, [stockId]);
 
-  useEffect(() => {
-    if (!chartRef.current || candles.length === 0) return;
-    const chart = createChart(chartRef.current, {
-      layout: { background: { type: ColorType.Solid, color: '#141925' }, textColor: '#8b93a7' },
-      grid: { vertLines: { color: '#272e3f' }, horzLines: { color: '#272e3f' } },
-      width: chartRef.current.clientWidth, height: 320,
-      timeScale: { timeVisible: true },
-    });
-    const series = chart.addCandlestickSeries({
-      upColor: '#16c784', downColor: '#ea3943', borderVisible: false,
-      wickUpColor: '#16c784', wickDownColor: '#ea3943',
-    });
-    series.setData(candles.map((c) => ({
-      time: c.date, open: c.open, high: c.high, low: c.low, close: c.close,
-    })) as any);
-    chart.timeScale().fitContent();
-    return () => chart.remove();
-  }, [candles]);
-
   const placeOrder = async () => {
-    setMsg(null);
     try {
       const { data } = await orderApi.place({
         stockId, orderType, direction, quantity: qty,
         limitPrice: orderType === 'LIMIT' ? Number(limitPrice) : undefined,
         stopPrice: orderType === 'STOP_LOSS' ? Number(stopPrice) : undefined,
       });
-      if (data.status === 'REJECTED') setMsg({ ok: false, text: `Rejected: ${data.rejectReason}` });
-      else if (data.status === 'EXECUTED') setMsg({ ok: true, text: `Executed at ${money(data.executedPrice, stock?.currency)}` });
-      else setMsg({ ok: true, text: `Order ${data.status.toLowerCase()} (will fill when price condition is met)` });
+      if (data.status === 'REJECTED') toast.error(`Order rejected: ${data.rejectReason}`);
+      else if (data.status === 'EXECUTED') toast.success(`${direction} ${qty} ${stock?.symbol} executed at ${money(data.executedPrice, stock?.currency)}`);
+      else toast.info(`Order ${data.status.toLowerCase()} — will fill when the price condition is met`);
     } catch (err: any) {
-      setMsg({ ok: false, text: err.response?.data?.error || 'Order failed' });
+      toast.error(err.response?.data?.error || 'Order failed');
     }
   };
 
   const addToWatchlist = async () => {
-    setActionMsg('');
     try {
       let wl = watchlists[0];
       if (!wl) {
@@ -80,16 +58,15 @@ export default function StockDetailPage() {
         wl = data;
       }
       await watchlistApi.addItem(wl.id, stockId);
-      setActionMsg(`Added to "${wl.name}"`);
+      toast.success(`${stock?.symbol} added to "${wl.name}"`);
       watchlistApi.list().then((r) => setWatchlists(r.data)).catch(() => {});
     } catch (err: any) {
-      setActionMsg(err.response?.data?.error || 'Could not add to watchlist');
+      toast.error(err.response?.data?.error || 'Could not add to watchlist');
     }
   };
 
   const setAlert = async () => {
     if (!stock) return;
-    setActionMsg('');
     const raw = window.prompt(`Alert me when ${stock.symbol} crosses price:`, String(Math.round(stock.currentPrice)));
     if (!raw) return;
     const threshold = Number(raw);
@@ -97,9 +74,9 @@ export default function StockDetailPage() {
     const condition = threshold >= stock.currentPrice ? 'ABOVE' : 'BELOW';
     try {
       await alertApi.create(stockId, condition, threshold);
-      setActionMsg(`Alert set: ${condition} ${money(threshold, stock.currency)}`);
+      toast.success(`Alert set: ${stock.symbol} ${condition} ${money(threshold, stock.currency)}`);
     } catch (err: any) {
-      setActionMsg(err.response?.data?.error || 'Could not set alert');
+      toast.error(err.response?.data?.error || 'Could not set alert');
     }
   };
 
@@ -108,35 +85,57 @@ export default function StockDetailPage() {
   const cur = stock.currency;
   const closed = !stock.marketOpen;
 
+  // Day-range slider position (clamped 0..100).
+  const range = stock.dayHigh - stock.dayLow;
+  const rangePos = range > 0 ? Math.min(100, Math.max(0, ((stock.currentPrice - stock.dayLow) / range) * 100)) : 50;
+
   return (
     <div>
       <h1 className="page-title">
-        {stock.symbol} — {stock.companyName}
+        {stock.symbol} <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: 18 }}>{stock.companyName}</span>
         <span className="badge badge-gray" style={{ marginLeft: 10, fontSize: 12, verticalAlign: 'middle' }}>
           {stock.market === 'US' ? '🇺🇸 US' : '🇮🇳 India'}
         </span>
       </h1>
-      <div className="grid" style={{ gridTemplateColumns: '2fr 1fr' }}>
+
+      <div className="grid" style={{ gridTemplateColumns: '2fr 1fr', alignItems: 'start' }}>
         <div>
           <div className="card" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
-              <div style={{ fontSize: 32, fontWeight: 700 }}>{money(stock.currentPrice, cur)}</div>
-              <div className={cls(stock.changePercent)} style={{ fontSize: 18 }}>{pct(stock.changePercent)}</div>
-              {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>Market closed · frozen</span>}
+            {/* Price header */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em' }}>{money(stock.currentPrice, cur)}</div>
+              <div className={`chg-pill ${cls(stock.changePercent)}`} style={{ fontSize: 17 }}>
+                {stock.changePercent >= 0 ? '▲' : '▼'} {pct(stock.changePercent)}
+              </div>
+              {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>● Market closed · frozen</span>}
             </div>
-            <div style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 6 }}>
-              Prev close {money(stock.previousClose, cur)} · High {money(stock.dayHigh, cur)} · Low {money(stock.dayLow, cur)} · Vol {stock.volume.toLocaleString('en-IN')}
+
+            {/* Chart */}
+            <div style={{ marginTop: 16 }}>
+              <PriceChart candles={candles} up={stock.changePercent >= 0} />
+            </div>
+
+            {/* Stat strip */}
+            <div className="stat-strip">
+              <div className="cell"><div className="k">Prev Close</div><div className="v">{money(stock.previousClose, cur)}</div></div>
+              <div className="cell"><div className="k">Day High</div><div className="v">{money(stock.dayHigh, cur)}</div></div>
+              <div className="cell"><div className="k">Day Low</div><div className="v">{money(stock.dayLow, cur)}</div></div>
+              <div className="cell"><div className="k">Volume</div><div className="v">{stock.volume.toLocaleString('en-IN')}</div></div>
+              <div className="cell"><div className="k">Market</div><div className="v">{stock.market === 'US' ? 'NASDAQ/NYSE' : 'NSE'}</div></div>
+            </div>
+
+            {/* Day range slider */}
+            <div className="range-row">
+              <div className="labels"><span>Day Low {money(stock.dayLow, cur)}</span><span>Day High {money(stock.dayHigh, cur)}</span></div>
+              <div className="range-track"><div className="range-dot" style={{ left: `${rangePos}%` }} /></div>
             </div>
           </div>
-          <div className="card">
-            <div className="stat-label" style={{ marginBottom: 12 }}>Price Chart (OHLCV)</div>
-            {candles.length > 0
-              ? <div ref={chartRef} />
-              : <p style={{ color: 'var(--text-dim)', fontSize: 14 }}>Candle data builds as the OHLCV job runs (every ~15s).</p>}
-          </div>
+
+          <SignalCard signal={signal} currency={cur} />
         </div>
 
-        <div className="card" style={{ height: 'fit-content' }}>
+        {/* Order panel */}
+        <div className="card" style={{ height: 'fit-content', position: 'sticky', top: 80 }}>
           <div className="stat-label" style={{ marginBottom: 14, fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>Place Order</div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
             <button onClick={() => setDirection('BUY')} style={{ flex: 1 }}
@@ -171,7 +170,6 @@ export default function StockDetailPage() {
           <div style={{ color: 'var(--text-dim)', fontSize: 13, margin: '8px 0 14px' }}>
             Est. total: <b style={{ color: 'var(--text)' }}>{money(estTotal, cur)}</b>
           </div>
-          {msg && <div className={msg.ok ? 'ok-msg' : 'error-msg'}>{msg.text}</div>}
           {closed && (
             <div className="error-msg" style={{ background: 'rgba(243,186,47,0.10)', color: 'var(--yellow)', border: '1px solid rgba(243,186,47,0.30)' }}>
               {stock.market === 'US' ? 'US' : 'Indian'} market is closed — trading is disabled until it reopens.
@@ -186,9 +184,6 @@ export default function StockDetailPage() {
             <button className="btn-ghost" style={{ flex: 1 }} onClick={addToWatchlist}>+ Watchlist</button>
             <button className="btn-ghost" style={{ flex: 1 }} onClick={setAlert}>Set Alert</button>
           </div>
-          {actionMsg && <div style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 8 }}>{actionMsg}</div>}
-
-          <SignalCard signal={signal} />
         </div>
       </div>
     </div>
