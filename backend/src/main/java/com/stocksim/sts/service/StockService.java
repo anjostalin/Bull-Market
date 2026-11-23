@@ -19,12 +19,20 @@ public class StockService {
     private final StockRepository stockRepository;
     private final StockPriceHistoryRepository historyRepository;
     private final MarketClock marketClock;
+    private final LiveQuoteService liveQuoteService;
+
+    // Simple in-memory cache of fetched daily history (symbol -> candles), refreshed periodically,
+    // so we don't hit Yahoo on every chart load.
+    private final java.util.Map<String, java.util.List<CandleView>> historyCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Map<String, Long> historyCacheAt = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long HISTORY_TTL_MS = 5 * 60 * 1000;
 
     public StockService(StockRepository stockRepository, StockPriceHistoryRepository historyRepository,
-                        MarketClock marketClock) {
+                        MarketClock marketClock, LiveQuoteService liveQuoteService) {
         this.stockRepository = stockRepository;
         this.historyRepository = historyRepository;
         this.marketClock = marketClock;
+        this.liveQuoteService = liveQuoteService;
     }
 
     public Page<StockView> list(String search, String market, Pageable pageable) {
@@ -47,7 +55,30 @@ public class StockService {
     }
 
     public List<CandleView> history(Long id) {
-        if (!stockRepository.existsById(id)) throw ApiException.notFound("Stock not found");
+        Stock stock = stockRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Stock not found"));
+
+        // Serve real daily candles fetched from Yahoo (cached ~5 min). Fall back to stored
+        // history if the live fetch returns nothing.
+        String sym = stock.getYahooSymbol();
+        if (sym != null && !sym.isBlank()) {
+            long now = System.currentTimeMillis();
+            Long at = historyCacheAt.get(sym);
+            if (at == null || now - at > HISTORY_TTL_MS || !historyCache.containsKey(sym)) {
+                List<Object[]> rows = liveQuoteService.fetchDailyHistory(sym);
+                if (!rows.isEmpty()) {
+                    List<CandleView> candles = rows.stream()
+                            .map(r -> new CandleView((java.time.LocalDate) r[0], (BigDecimal) r[1],
+                                    (BigDecimal) r[2], (BigDecimal) r[3], (BigDecimal) r[4], (Long) r[5]))
+                            .toList();
+                    historyCache.put(sym, candles);
+                    historyCacheAt.put(sym, now);
+                }
+            }
+            List<CandleView> cached = historyCache.get(sym);
+            if (cached != null && !cached.isEmpty()) return cached;
+        }
+
         return historyRepository.findByStockIdOrderByDateAsc(id).stream()
                 .map(h -> new CandleView(h.getDate(), h.getOpen(), h.getHigh(), h.getLow(), h.getClose(), h.getVolume()))
                 .toList();

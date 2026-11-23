@@ -36,7 +36,7 @@ export default function VerifyPage() {
         <div className="auth2-logo">Stock<span>Sim</span> Pro<span className="dot">.</span></div>
         <div className="auth2-hero">
           <h1>Almost there.</h1>
-          <p>We're confirming your email so you can start trading in a safe, simulated environment.</p>
+          <p>We're confirming your email so you can start trading right away.</p>
         </div>
         <div className="auth2-ticker"><span className="t">Secure email verification · One-time link</span></div>
       </div>

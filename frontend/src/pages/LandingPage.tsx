@@ -10,7 +10,7 @@ const features = [
   { ic: '💡', title: 'AI-powered signals', text: 'Technical indicators turn into clear buy, hold and sell guidance.' },
   { ic: '💱', title: 'Dual-currency wallet', text: 'Hold and trade in ₹ and $ with separate balances — no conversion guesswork.' },
   { ic: '🧾', title: 'Full order types', text: 'Place Market, Limit and Stop-Loss orders with an automated matching engine.' },
-  { ic: '🏆', title: 'Paper trading', text: 'Practice risk-free with virtual capital and compete on the leaderboard.' },
+  { ic: '🏆', title: 'Paper trading', text: 'Test strategies with a separate practice account and compete on the leaderboard.' },
   { ic: '🔔', title: 'Alerts & insights', text: 'Set price alerts, build watchlists, and track your portfolio performance.' },
 ];
 
@@ -24,7 +24,7 @@ const stats = [
   { v: '34+', k: 'Stocks across 2 markets' },
   { v: '₹10L', k: 'Paper-trading capital' },
   { v: '2', k: 'Currencies supported' },
-  { v: '100%', k: 'Risk-free & simulated' },
+  { v: 'Live', k: 'Real-time market data' },
 ];
 
 export default function LandingPage() {
@@ -59,11 +59,11 @@ export default function LandingPage() {
       </nav>
 
       <header className="landing-hero">
-        <span className="landing-badge">● Risk-free equity trading simulator</span>
-        <h1>Learn to trade the markets — without risking a rupee.</h1>
+        <span className="landing-badge">● Live Indian &amp; US equity trading</span>
+        <h1>Trade the markets, all in one place.</h1>
         <p>
-          Practice with real-time Indian and US stock prices, AI-driven insights, and a
-          dual-currency portfolio. Build your instincts in a safe, simulated environment.
+          Real-time Indian and US stock prices, AI-driven insights, and a dual-currency
+          portfolio — with live charts, instant order execution, and powerful analytics.
         </p>
         <div className="landing-cta">
           {user ? (
@@ -132,13 +132,13 @@ export default function LandingPage() {
 
       <section className="landing-closing">
         <h2>Ready to start trading?</h2>
-        <p>Join StockSim Pro and build your market confidence today — completely free.</p>
+        <p>Join StockSim Pro and trade live Indian and US markets today.</p>
         {!user && <Link to="/register" className="btn-lg btn-grad">Create your free account</Link>}
         {user && <Link to="/dashboard" className="btn-lg btn-grad">Go to Dashboard →</Link>}
       </section>
 
       <footer className="landing-foot">
-        StockSim Pro — a simulated trading platform for learning. All money and trades are virtual.
+        StockSim Pro — live Indian &amp; US equity trading with real-time market data.
       </footer>
     </div>
   );

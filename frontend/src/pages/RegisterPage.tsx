@@ -33,8 +33,8 @@ export default function RegisterPage() {
         <div className="auth2-hero">
           <h1>Start trading<br />in minutes.</h1>
           <p>
-            Create a free account and get virtual capital to practice with. Explore real
-            markets, place orders, and learn the ropes — completely risk-free.
+            Create a free account to trade real-time Indian and US markets — with live
+            charts, instant orders, and a dual-currency portfolio.
           </p>
         </div>
 
@@ -42,8 +42,8 @@ export default function RegisterPage() {
           <div className="auth2-feature">
             <div className="ic">🎁</div>
             <div>
-              <h4>Virtual starting capital</h4>
-              <p>Begin with simulated funds across Indian and US markets.</p>
+              <h4>Starting capital included</h4>
+              <p>Begin with a funded ₹ and $ wallet across Indian and US markets.</p>
             </div>
           </div>
           <div className="auth2-feature">

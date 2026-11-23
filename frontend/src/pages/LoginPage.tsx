@@ -45,10 +45,10 @@ export default function LoginPage() {
         <div className="auth2-logo">Stock<span>Sim</span> Pro<span className="dot">.</span></div>
 
         <div className="auth2-hero">
-          <h1>Trade smarter.<br />Learn faster.</h1>
+          <h1>Trade smarter.<br />Move faster.</h1>
           <p>
-            Build real market instincts in a risk-free environment. Track live prices,
-            place orders, and grow your portfolio — without risking a rupee.
+            Track real-time Indian and US markets, place orders instantly, and
+            grow your portfolio — all from one powerful dashboard.
           </p>
         </div>
 
