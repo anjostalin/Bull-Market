@@ -105,7 +105,7 @@ export default function StockDetailPage() {
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em' }}>{money(stock.currentPrice, cur)}</div>
               <div className={`chg-pill ${cls(stock.changePercent)}`} style={{ fontSize: 17 }}>
-                {stock.changePercent >= 0 ? '▲' : '▼'} {pct(stock.changePercent)}
+                {stock.changePercent >= 0 ? '▲' : '▼'} {money(Math.abs(stock.currentPrice - stock.previousClose), cur)} ({pct(stock.changePercent)})
               </div>
               {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>● Market closed</span>}
             </div>

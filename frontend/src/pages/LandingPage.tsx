@@ -42,7 +42,7 @@ export default function LandingPage() {
   return (
     <div className="landing">
       <nav className="landing-nav">
-        <div className="landing-logo">Bull<span>Market</span><span className="dot">.</span></div>
+        <Link to="/" className="landing-logo">Bull<span>Market</span><span className="dot">.</span></Link>
         <div className="landing-nav-actions">
           <button className="theme-toggle" onClick={toggle} aria-label="Toggle theme">
             {theme === 'dark' ? '☀️' : '🌙'}
