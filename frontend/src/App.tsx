@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
+import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
 import MarketPage from './pages/MarketPage';
 import StockDetailPage from './pages/StockDetailPage';
@@ -34,6 +35,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify" element={<VerifyPage />} />
       <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
       <Route path="/market" element={<Protected><MarketPage /></Protected>} />
       <Route path="/stock/:id" element={<Protected><StockDetailPage /></Protected>} />
