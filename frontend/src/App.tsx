@@ -14,6 +14,7 @@ import WalletPage from './pages/WalletPage';
 import WatchlistPage from './pages/WatchlistPage';
 import PaperTradingPage from './pages/PaperTradingPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import SecurityPage from './pages/SecurityPage';
 import AdminPage from './pages/AdminPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -45,6 +46,7 @@ export default function App() {
       <Route path="/paper" element={<Protected><PaperTradingPage /></Protected>} />
       <Route path="/leaderboard" element={<Protected><LeaderboardPage /></Protected>} />
       <Route path="/wallet" element={<Protected><WalletPage /></Protected>} />
+      <Route path="/security" element={<Protected><SecurityPage /></Protected>} />
       <Route path="/admin" element={<AdminOnly><AdminPage /></AdminOnly>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

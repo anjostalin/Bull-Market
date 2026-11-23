@@ -12,6 +12,7 @@ const links = [
   { to: '/paper', label: 'Paper Trading', icon: '🧪' },
   { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
   { to: '/wallet', label: 'Wallet', icon: '👛' },
+  { to: '/security', label: 'Security', icon: '🔐' },
 ];
 
 function initials(name?: string): string {

@@ -107,7 +107,7 @@ export default function StockDetailPage() {
               <div className={`chg-pill ${cls(stock.changePercent)}`} style={{ fontSize: 17 }}>
                 {stock.changePercent >= 0 ? '▲' : '▼'} {pct(stock.changePercent)}
               </div>
-              {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>● Market closed · frozen</span>}
+              {closed && <span className="badge badge-yellow" style={{ fontSize: 12 }}>● Market closed</span>}
             </div>
 
             {/* Chart */}

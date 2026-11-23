@@ -20,7 +20,7 @@ export default function VerifyPage() {
       return;
     }
     authApi.verify(token)
-      .then((r) => { setState('success'); setMessage(r.data.message || 'Email verified. You can now log in.'); })
+      .then(() => { setState('success'); setMessage('Your email is confirmed. You can now sign in and start trading.'); })
       .catch((err) => {
         setState('error');
         setMessage(err.response?.data?.error || 'Verification failed. The link may have expired or already been used.');

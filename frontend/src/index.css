@@ -506,12 +506,19 @@ tbody tr:hover { background: var(--bg-elev-2); }
 }
 .landing-ticker .t b { margin-right: 8px; }
 
+.landing-section { padding: 60px 7vw 10px; }
+.landing-section-head { text-align: center; margin-bottom: 36px; }
+.landing-section-head h2 { font-size: clamp(24px, 3.5vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+.landing-section-head p { color: var(--text-dim); font-size: 16px; }
+
 .landing-features {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 50px 7vw 70px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
 }
 .landing-feature {
   background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+  transition: border-color 0.15s, transform 0.15s;
 }
+.landing-feature:hover { border-color: var(--accent); transform: translateY(-3px); }
 .landing-feature .fic {
   width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center;
   font-size: 20px; margin-bottom: 14px;
@@ -519,10 +526,40 @@ tbody tr:hover { background: var(--bg-elev-2); }
 }
 .landing-feature h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
 .landing-feature p { font-size: 14px; color: var(--text-dim); line-height: 1.55; }
+
+/* Stats band */
+.landing-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  margin: 64px 7vw 0; background: var(--border); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+}
+.landing-stat { background: var(--bg-elev); padding: 28px 20px; text-align: center; }
+.landing-stat .sv { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+.landing-stat .sk { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+
+/* How it works */
+.landing-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.landing-step { text-align: center; padding: 20px; }
+.landing-step .step-num {
+  width: 46px; height: 46px; border-radius: 50%; margin: 0 auto 16px; display: grid; place-items: center;
+  font-size: 20px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--accent), #4f46e5);
+}
+.landing-step h3 { font-size: 17px; font-weight: 700; margin-bottom: 7px; }
+.landing-step p { color: var(--text-dim); font-size: 14px; line-height: 1.55; max-width: 280px; margin: 0 auto; }
+
+/* Closing CTA */
+.landing-closing { text-align: center; padding: 72px 7vw; margin-top: 40px; }
+.landing-closing h2 { font-size: clamp(26px, 4vw, 36px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+.landing-closing p { color: var(--text-dim); font-size: 17px; margin-bottom: 24px; }
+
 .landing-foot { text-align: center; padding: 24px; color: var(--text-dim); font-size: 13px; border-top: 1px solid var(--border); }
 
-@media (max-width: 900px) { .landing-features { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) {
+  .landing-features { grid-template-columns: repeat(2, 1fr); }
+  .landing-steps { grid-template-columns: 1fr; }
+  .landing-stats { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 560px) { .landing-features { grid-template-columns: 1fr; } }
+
 
 /* ============================================================
    Stock detail: chart toolbar, stat strip, day-range slider

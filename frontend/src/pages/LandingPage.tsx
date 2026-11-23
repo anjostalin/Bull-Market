@@ -6,10 +6,25 @@ import { useTheme } from '../context/ThemeContext';
 import type { Stock } from '../types';
 
 const features = [
-  { ic: '📈', title: 'Real-time markets', text: 'Live prices across Indian and US stocks, updated every second.' },
+  { ic: '📈', title: 'Real-time markets', text: 'Follow live prices and interactive charts across Indian and US stocks.' },
   { ic: '💡', title: 'AI-powered signals', text: 'Technical indicators turn into clear buy, hold and sell guidance.' },
-  { ic: '💱', title: 'Dual-currency wallet', text: 'Trade in ₹ and $ with separate balances — no conversion guesswork.' },
-  { ic: '🏆', title: 'Paper trading', text: 'Practice risk-free with virtual capital and climb the leaderboard.' },
+  { ic: '💱', title: 'Dual-currency wallet', text: 'Hold and trade in ₹ and $ with separate balances — no conversion guesswork.' },
+  { ic: '🧾', title: 'Full order types', text: 'Place Market, Limit and Stop-Loss orders with an automated matching engine.' },
+  { ic: '🏆', title: 'Paper trading', text: 'Practice risk-free with virtual capital and compete on the leaderboard.' },
+  { ic: '🔔', title: 'Alerts & insights', text: 'Set price alerts, build watchlists, and track your portfolio performance.' },
+];
+
+const steps = [
+  { n: '1', title: 'Create your account', text: 'Sign up in seconds and verify your email to get started.' },
+  { n: '2', title: 'Explore the markets', text: 'Browse Indian and US stocks, study charts, and read AI signals.' },
+  { n: '3', title: 'Trade & track', text: 'Place orders, manage your portfolio, and watch your returns grow.' },
+];
+
+const stats = [
+  { v: '34+', k: 'Stocks across 2 markets' },
+  { v: '₹10L', k: 'Paper-trading capital' },
+  { v: '2', k: 'Currencies supported' },
+  { v: '100%', k: 'Risk-free & simulated' },
 ];
 
 export default function LandingPage() {
@@ -74,14 +89,52 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <section className="landing-features">
-        {features.map((f) => (
-          <div className="landing-feature" key={f.title}>
-            <div className="fic">{f.ic}</div>
-            <h3>{f.title}</h3>
-            <p>{f.text}</p>
+      <section className="landing-section">
+        <div className="landing-section-head">
+          <h2>Everything you need to learn the markets</h2>
+          <p>A complete trading experience — minus the financial risk.</p>
+        </div>
+        <div className="landing-features">
+          {features.map((f) => (
+            <div className="landing-feature" key={f.title}>
+              <div className="fic">{f.ic}</div>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-stats">
+        {stats.map((s) => (
+          <div className="landing-stat" key={s.k}>
+            <div className="sv">{s.v}</div>
+            <div className="sk">{s.k}</div>
           </div>
         ))}
+      </section>
+
+      <section className="landing-section">
+        <div className="landing-section-head">
+          <h2>Get started in three steps</h2>
+          <p>From sign-up to your first trade in minutes.</p>
+        </div>
+        <div className="landing-steps">
+          {steps.map((s) => (
+            <div className="landing-step" key={s.n}>
+              <div className="step-num">{s.n}</div>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-closing">
+        <h2>Ready to start trading?</h2>
+        <p>Join StockSim Pro and build your market confidence today — completely free.</p>
+        {!user && <Link to="/register" className="btn-lg btn-grad">Create your free account</Link>}
+        {user && <Link to="/dashboard" className="btn-lg btn-grad">Go to Dashboard →</Link>}
       </section>
 
       <footer className="landing-foot">
