@@ -4,12 +4,51 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { portfolioApi, stockApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { PortfolioSummary, SnapshotPoint, Stock } from '../types';
-import { inr, money, pct, cls } from '../services/format';
+import { money, pct, cls } from '../services/format';
+
+function ValueChart({ title, data, cur }: { title: string; data: SnapshotPoint[]; cur: 'INR' | 'USD' }) {
+  const chartData = data.map((h) => ({
+    t: new Date(h.time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+    v: h.value,
+  }));
+  const sym = cur === 'USD' ? '$' : '₹';
+  return (
+    <div className="card">
+      <div className="section-head"><h3>{title}</h3>
+        <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>recent</span></div>
+      {chartData.length > 1 ? (
+        <ResponsiveContainer width="100%" height={220}>
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id={`pv-${cur}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="t" stroke="#8b93a7" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#8b93a7" fontSize={11} domain={['auto', 'auto']} width={70} tickLine={false} axisLine={false}
+              tickFormatter={(v) => sym + (v / 1000).toFixed(0) + 'k'} />
+            <Tooltip contentStyle={{ background: '#1c2333', border: '1px solid #272e3f', borderRadius: 8 }}
+              formatter={(v: number) => money(v, cur)} />
+            <Area type="monotone" dataKey="v" stroke="#3b82f6" strokeWidth={2} fill={`url(#pv-${cur})`} />
+          </AreaChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="empty-state">
+          <div className="ico">📊</div>
+          <h4>Building your chart</h4>
+          <p>Your portfolio value is sampled periodically — this fills in as snapshots are captured.</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [summary, setSummary] = useState<PortfolioSummary | null>(null);
-  const [history, setHistory] = useState<SnapshotPoint[]>([]);
+  const [histInr, setHistInr] = useState<SnapshotPoint[]>([]);
+  const [histUsd, setHistUsd] = useState<SnapshotPoint[]>([]);
   const [movers, setMovers] = useState<Stock[]>([]);
 
   useEffect(() => {
@@ -21,15 +60,11 @@ export default function DashboardPage() {
       }).catch(() => {});
     };
     load();
-    portfolioApi.history(30).then((r) => setHistory(r.data)).catch(() => {});
+    portfolioApi.history(30, 'INR').then((r) => setHistInr(r.data)).catch(() => {});
+    portfolioApi.history(30, 'USD').then((r) => setHistUsd(r.data)).catch(() => {});
     const iv = setInterval(load, 5000);
     return () => clearInterval(iv);
   }, []);
-
-  const chartData = history.map((h) => ({
-    t: new Date(h.time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-    v: h.value,
-  }));
 
   const inrSec = summary?.sections.find((s) => s.currency === 'INR');
   const usdSec = summary?.sections.find((s) => s.currency === 'USD');
@@ -77,35 +112,11 @@ export default function DashboardPage() {
       {row(usdSec, 'USD', '🇺🇸', 'US ($)')}
 
       <div className="grid grid-2" style={{ marginTop: 16 }}>
-        <div className="card">
-          <div className="section-head"><h3>Portfolio Value</h3>
-            <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>🇮🇳 India (₹) · recent</span></div>
-          {chartData.length > 1 ? (
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="t" stroke="#8b93a7" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8b93a7" fontSize={11} domain={['auto', 'auto']} width={64} tickLine={false} axisLine={false}
-                  tickFormatter={(v) => '₹' + (v / 1000).toFixed(0) + 'k'} />
-                <Tooltip contentStyle={{ background: '#1c2333', border: '1px solid #272e3f', borderRadius: 8 }}
-                  formatter={(v: number) => inr(v)} />
-                <Area type="monotone" dataKey="v" stroke="#3b82f6" strokeWidth={2} fill="url(#pv)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="empty-state">
-              <div className="ico">📊</div>
-              <h4>Building your chart</h4>
-              <p>Your portfolio value is sampled periodically — this fills in as snapshots are captured.</p>
-            </div>
-          )}
-        </div>
+        <ValueChart title="🇮🇳 India Portfolio (₹)" data={histInr} cur="INR" />
+        <ValueChart title="🇺🇸 US Portfolio ($)" data={histUsd} cur="USD" />
+      </div>
 
+      <div className="grid grid-2" style={{ marginTop: 16 }}>
         <div className="card">
           <div className="section-head"><h3>Top Movers Today</h3>
             <Link to="/market" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>View market →</Link></div>

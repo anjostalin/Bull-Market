@@ -1,4 +1,4 @@
-# StockSim Pro — Stock Trading System
+# Bull Market — Stock Trading System
 
 A full-stack simulated equity trading platform built for the FSAD (Full Stack Application Development) project.
 

@@ -82,22 +82,25 @@ public class PortfolioService {
     }
 
     /**
-     * INR-only net worth (INR holdings at market + INR cash). Feeds the portfolio-value snapshot/chart,
-     * which stays single-currency by design (no cross-currency aggregation).
+     * Net worth for one currency: that currency's holdings at market value + that currency's cash.
+     * Feeds the per-currency portfolio-value snapshots/charts (no cross-currency aggregation).
      */
-    public BigDecimal netWorth(Long userId) {
+    public BigDecimal netWorth(Long userId, String currency) {
         Wallet wallet = walletService.getByUser(userId);
-        BigDecimal inrHoldings = holdingRepository.findByUserId(userId).stream()
-                .filter(h -> "INR".equalsIgnoreCase(h.getStock().getCurrency()))
+        BigDecimal cash = "USD".equalsIgnoreCase(currency) ? wallet.getBalanceUsd() : wallet.getBalanceInr();
+        BigDecimal holdings = holdingRepository.findByUserId(userId).stream()
+                .filter(h -> currency.equalsIgnoreCase(h.getStock().getCurrency()))
                 .map(h -> h.getStock().getCurrentPrice().multiply(BigDecimal.valueOf(h.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
-        return inrHoldings.add(wallet.getBalanceInr());
+        return holdings.add(cash);
     }
 
-    public List<SnapshotPoint> history(Long userId, int days) {
+    public List<SnapshotPoint> history(Long userId, int days, String currency) {
         LocalDateTime after = LocalDateTime.now().minusDays(days);
-        return snapshotRepository.findByUserIdAndSnapshotAtAfterOrderBySnapshotAtAsc(userId, after).stream()
+        String cur = currency == null || currency.isBlank() ? "INR" : currency.trim().toUpperCase();
+        return snapshotRepository
+                .findByUserIdAndCurrencyAndSnapshotAtAfterOrderBySnapshotAtAsc(userId, cur, after).stream()
                 .map(s -> new SnapshotPoint(s.getSnapshotAt(), s.getTotalValue()))
                 .toList();
     }

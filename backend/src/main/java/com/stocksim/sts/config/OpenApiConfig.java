@@ -16,7 +16,7 @@ public class OpenApiConfig {
         final String scheme = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
-                        .title("StockSim Pro API")
+                        .title("Bull Market API")
                         .description("Stock Trading System - FSAD Project REST API")
                         .version("1.0.0"))
                 .addSecurityItem(new SecurityRequirement().addList(scheme))

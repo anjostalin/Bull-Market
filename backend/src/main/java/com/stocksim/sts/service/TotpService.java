@@ -27,7 +27,7 @@ public class TotpService {
         user.setTotpSecret(key.getKey());
         userRepository.save(user);
         // otpauth URI the authenticator app scans
-        return String.format("otpauth://totp/StockSimPro:%s?secret=%s&issuer=StockSimPro",
+        return String.format("otpauth://totp/BullMarket:%s?secret=%s&issuer=BullMarket",
                 user.getEmail(), key.getKey());
     }
 

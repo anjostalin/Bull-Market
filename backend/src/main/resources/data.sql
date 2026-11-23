@@ -1,5 +1,5 @@
 -- ============================================================
--- StockSim Pro seed data (idempotent inserts)
+-- Bull Market seed data (idempotent inserts)
 -- Runs after Hibernate creates the schema (defer-datasource-initialization=true)
 -- Uses INSERT ... SELECT ... WHERE NOT EXISTS with aliased columns so re-runs
 -- never duplicate rows and MySQL does not complain about derived column names.

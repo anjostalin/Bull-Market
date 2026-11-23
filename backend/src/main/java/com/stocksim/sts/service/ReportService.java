@@ -47,7 +47,7 @@ public class ReportService {
              PdfDocument pdf = new PdfDocument(writer);
              Document doc = new Document(pdf)) {
 
-            doc.add(new Paragraph("StockSim Pro — Portfolio Statement")
+            doc.add(new Paragraph("Bull Market — Portfolio Statement")
                     .setBold().setFontSize(18));
             doc.add(new Paragraph("Investor: " + user.getFullName() + "  (" + user.getEmail() + ")")
                     .setFontSize(10));

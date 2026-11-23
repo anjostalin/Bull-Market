@@ -28,5 +28,5 @@ public class PaperDtos {
             List<PaperHoldingView> holdings) {}
 
     public record LeaderboardEntry(
-            int rank, String trader, BigDecimal totalValue, BigDecimal returnPercent) {}
+            int rank, String trader, BigDecimal totalValue, BigDecimal returnPercent, BigDecimal profitLoss) {}
 }

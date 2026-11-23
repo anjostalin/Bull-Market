@@ -3,7 +3,7 @@ import { paperApi } from '../services/api';
 import { inr, pct, cls } from '../services/format';
 
 interface LeaderboardEntry {
-  rank: number; trader: string; totalValue: number; returnPercent: number;
+  rank: number; trader: string; totalValue: number; returnPercent: number; profitLoss: number;
 }
 
 export default function LeaderboardPage() {
@@ -32,8 +32,8 @@ export default function LeaderboardPage() {
             <div key={e.rank} className={`podium-card ${classOf(e.rank)}`}>
               <div className="podium-medal">{medal(e.rank)}</div>
               <div className="podium-name">{e.trader}</div>
-              <div className={`podium-return ${cls(e.returnPercent)}`}>{pct(e.returnPercent)}</div>
-              <div className="podium-value">{inr(e.totalValue)}</div>
+              <div className={`podium-return ${cls(e.profitLoss)}`}>{e.profitLoss >= 0 ? '+' : ''}{inr(e.profitLoss)}</div>
+              <div className="podium-value">{pct(e.returnPercent)} · {inr(e.totalValue)}</div>
             </div>
           ))}
         </div>
@@ -42,20 +42,25 @@ export default function LeaderboardPage() {
       <div className="card" style={{ padding: 0 }}>
         <table>
           <thead>
-            <tr><th>Rank</th><th>Trader</th><th style={{ textAlign: 'right' }}>Total Value</th>
-              <th style={{ textAlign: 'right' }}>Return %</th></tr>
+            <tr><th>Rank</th><th>Trader</th>
+              <th style={{ textAlign: 'right' }}>Profit / Loss</th>
+              <th style={{ textAlign: 'right' }}>Return %</th>
+              <th style={{ textAlign: 'right' }}>Total Value</th></tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.rank}>
                 <td style={{ fontWeight: 700 }}>{medal(r.rank)}</td>
                 <td>{r.trader}</td>
-                <td style={{ textAlign: 'right' }}>{inr(r.totalValue)}</td>
+                <td className={cls(r.profitLoss)} style={{ textAlign: 'right', fontWeight: 700 }}>
+                  {r.profitLoss >= 0 ? '+' : ''}{inr(r.profitLoss)}
+                </td>
                 <td className={`${cls(r.returnPercent)}`} style={{ textAlign: 'right', fontWeight: 600 }}>{pct(r.returnPercent)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--text-dim)' }}>{inr(r.totalValue)}</td>
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={4}>
+              <tr><td colSpan={5}>
                 <div className="empty-state">
                   <div className="ico">🏆</div>
                   <h4>No paper traders yet</h4>

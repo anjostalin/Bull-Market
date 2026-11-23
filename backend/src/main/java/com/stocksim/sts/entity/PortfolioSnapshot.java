@@ -20,6 +20,10 @@ public class PortfolioSnapshot {
     @Column(nullable = false)
     private Long userId;
 
+    @Column(length = 4)
+    @Builder.Default
+    private String currency = "INR";
+
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal totalValue;
 

@@ -65,7 +65,8 @@ export const walletApi = {
 
 export const portfolioApi = {
   summary: () => api.get<PortfolioSummary>('/portfolio'),
-  history: (days = 30) => api.get<SnapshotPoint[]>('/portfolio/history', { params: { days } }),
+  history: (days = 30, currency: 'INR' | 'USD' = 'INR') =>
+    api.get<SnapshotPoint[]>('/portfolio/history', { params: { days, currency } }),
 };
 
 export const signalApi = {

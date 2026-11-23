@@ -36,21 +36,21 @@ public class EmailService {
 
     public void sendVerification(String to, String token) {
         String link = baseUrl + "/verify?token=" + token;
-        send(to, "Verify your StockSim Pro account",
-                "Welcome to StockSim Pro!\n\nVerify your account:\n" + link +
+        send(to, "Verify your Bull Market account",
+                "Welcome to Bull Market!\n\nVerify your account:\n" + link +
                         "\n\nThis link expires in 24 hours.");
     }
 
     public void sendPasswordResetOtp(String to, String otp) {
-        send(to, "StockSim Pro password reset code",
+        send(to, "Bull Market password reset code",
                 "Your password reset code is: " + otp + "\n\nThis code expires in 15 minutes.");
     }
 
     public void sendOrderExecuted(String to, String detail) {
-        send(to, "Order executed - StockSim Pro", detail);
+        send(to, "Order executed - Bull Market", detail);
     }
 
     public void sendPriceAlert(String to, String detail) {
-        send(to, "Price alert - StockSim Pro", detail);
+        send(to, "Price alert - Bull Market", detail);
     }
 }

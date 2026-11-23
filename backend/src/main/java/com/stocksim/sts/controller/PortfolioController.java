@@ -23,7 +23,9 @@ public class PortfolioController {
     }
 
     @GetMapping("/history")
-    public List<SnapshotPoint> history(@RequestParam(defaultValue = "30") int days) {
-        return portfolioService.history(SecurityUtil.currentUserId(), days);
+    public List<SnapshotPoint> history(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "INR") String currency) {
+        return portfolioService.history(SecurityUtil.currentUserId(), days, currency);
     }
 }

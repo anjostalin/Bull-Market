@@ -114,13 +114,15 @@ public class PaperTradingService {
         for (PaperWallet w : wallets) {
             PaperPortfolio p = portfolio(w.getUserId());
             String name = userRepository.findById(w.getUserId()).map(User::getFullName).orElse("Trader " + w.getUserId());
-            entries.add(new LeaderboardEntry(0, name, p.totalValue(), p.returnPercent()));
+            BigDecimal pnl = p.totalValue().subtract(INITIAL_CAPITAL).setScale(2, RoundingMode.HALF_UP);
+            entries.add(new LeaderboardEntry(0, name, p.totalValue(), p.returnPercent(), pnl));
         }
-        entries.sort(Comparator.comparing(LeaderboardEntry::returnPercent).reversed());
+        // Rank by profit/loss (highest first) — the most meaningful competitive metric.
+        entries.sort(Comparator.comparing(LeaderboardEntry::profitLoss).reversed());
         List<LeaderboardEntry> ranked = new ArrayList<>();
         for (int i = 0; i < entries.size(); i++) {
             LeaderboardEntry e = entries.get(i);
-            ranked.add(new LeaderboardEntry(i + 1, e.trader(), e.totalValue(), e.returnPercent()));
+            ranked.add(new LeaderboardEntry(i + 1, e.trader(), e.totalValue(), e.returnPercent(), e.profitLoss()));
         }
         return ranked;
     }

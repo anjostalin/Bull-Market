@@ -35,9 +35,11 @@ public class PortfolioSnapshotService {
         for (User user : userRepository.findAll()) {
             if (user.getRole() == User.Role.ADMIN) continue;
             try {
-                BigDecimal value = portfolioService.netWorth(user.getId());
-                snapshotRepository.save(PortfolioSnapshot.builder()
-                        .userId(user.getId()).totalValue(value).build());
+                for (String currency : new String[]{"INR", "USD"}) {
+                    BigDecimal value = portfolioService.netWorth(user.getId(), currency);
+                    snapshotRepository.save(PortfolioSnapshot.builder()
+                            .userId(user.getId()).currency(currency).totalValue(value).build());
+                }
             } catch (Exception ignored) {
                 // a user without a wallet yet (edge case) should not break the batch
             }
