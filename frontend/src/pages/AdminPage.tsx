@@ -49,18 +49,29 @@ export default function AdminPage() {
 
   return (
     <div>
-      <h1 className="page-title">Admin Panel</h1>
+      <h1 className="page-title">Admin Panel <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: 14 }}>· platform controls</span></h1>
 
       <div className="grid grid-4" style={{ marginBottom: 16 }}>
-        <div className="card"><div className="stat-label">Total Users</div><div className="stat-value">{metrics?.totalUsers ?? '—'}</div></div>
-        <div className="card"><div className="stat-label">Active Traders</div><div className="stat-value">{metrics?.activeTraders ?? '—'}</div></div>
-        <div className="card"><div className="stat-label">Orders (exec/pending)</div>
-          <div className="stat-value">{metrics?.executedOrders ?? '—'}<span style={{ fontSize: 14, color: 'var(--text-dim)' }}> / {metrics?.pendingOrders ?? '—'}</span></div></div>
-        <div className="card"><div className="stat-label">Trade Volume</div><div className="stat-value">{inr(metrics?.totalTradeVolume)}</div></div>
+        <div className="card">
+          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Total Users</div><div className="stat-ic">👥</div></div>
+          <div className="stat-value">{metrics?.totalUsers ?? '—'}</div>
+        </div>
+        <div className="card">
+          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Active Traders</div><div className="stat-ic g">🟢</div></div>
+          <div className="stat-value">{metrics?.activeTraders ?? '—'}</div>
+        </div>
+        <div className="card">
+          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Orders exec / pending</div><div className="stat-ic y">📋</div></div>
+          <div className="stat-value">{metrics?.executedOrders ?? '—'}<span style={{ fontSize: 14, color: 'var(--text-dim)' }}> / {metrics?.pendingOrders ?? '—'}</span></div>
+        </div>
+        <div className="card">
+          <div className="stat-card-head"><div className="stat-label" style={{ margin: 0 }}>Trade Volume</div><div className="stat-ic">💹</div></div>
+          <div className="stat-value">{inr(metrics?.totalTradeVolume)}</div>
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="stat-label" style={{ marginBottom: 12 }}>Price Override</div>
+        <div className="section-head"><h3>Price Override</h3></div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <select value={overrideStock} onChange={(e) => setOverrideStock(Number(e.target.value))} style={{ maxWidth: 240 }}>
             {stocks.map((s) => <option key={s.id} value={s.id}>{s.symbol} — {inr(s.currentPrice)}</option>)}
@@ -72,6 +83,7 @@ export default function AdminPage() {
       </div>
 
       <div className="card" style={{ padding: 0 }}>
+        <div className="section-head" style={{ padding: '16px 18px 0' }}><h3>Users</h3></div>
         <table>
           <thead>
             <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr>

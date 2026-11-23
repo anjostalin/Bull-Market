@@ -50,16 +50,20 @@ export default function WatchlistPage() {
       </div>
 
       {watchlists.length === 0 && (
-        <div className="card" style={{ marginBottom: 16, color: 'var(--text-dim)' }}>
-          No watchlists yet. Create one above, or add stocks from a stock's detail page.
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="empty-state">
+            <div className="ico">⭐</div>
+            <h4>No watchlists yet</h4>
+            <p>Create one above, or tap “+ Watchlist” on any stock’s detail page to start tracking it.</p>
+          </div>
         </div>
       )}
 
       {watchlists.map((wl) => (
         <div className="card" style={{ marginBottom: 16, padding: 0 }} key={wl.id}>
           <div style={{ padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
-            <b>{wl.name}</b>
-            <button className="btn-ghost" style={{ padding: '4px 10px', fontSize: 12 }}
+            <b>⭐ {wl.name}</b>
+            <button className="btn-ghost" style={{ padding: '5px 12px', fontSize: 12 }}
               onClick={async () => { await watchlistApi.remove(wl.id); load(); }}>Delete list</button>
           </div>
           <table>
@@ -86,7 +90,7 @@ export default function WatchlistPage() {
         </div>
       ))}
 
-      <h2 style={{ fontSize: 18, margin: '24px 0 12px' }}>Price Alerts</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 700, margin: '26px 0 14px' }}>🔔 Price Alerts</h2>
       <div className="card" style={{ padding: 0 }}>
         <table>
           <thead>
@@ -97,17 +101,25 @@ export default function WatchlistPage() {
             {alerts.map((a) => (
               <tr key={a.id}>
                 <td style={{ fontWeight: 700 }}>{a.symbol}</td>
-                <td>{a.condition}</td>
+                <td><span className="badge badge-gray">{a.condition}</span></td>
                 <td style={{ textAlign: 'right' }}>{inr(a.threshold)}</td>
                 <td><span className={`badge ${a.active ? 'badge-yellow' : 'badge-green'}`}>
                   {a.active ? 'ACTIVE' : 'TRIGGERED'}</span></td>
                 <td style={{ textAlign: 'right' }}>
-                  <button className="btn-ghost" style={{ padding: '4px 10px', fontSize: 12 }}
+                  <button className="btn-ghost" style={{ padding: '5px 12px', fontSize: 12 }}
                     onClick={() => deleteAlert(a.id)}>Delete</button>
                 </td>
               </tr>
             ))}
-            {alerts.length === 0 && <tr><td colSpan={5} style={{ color: 'var(--text-dim)' }}>No alerts. Set one from a stock page.</td></tr>}
+            {alerts.length === 0 && (
+              <tr><td colSpan={5}>
+                <div className="empty-state">
+                  <div className="ico">🔔</div>
+                  <h4>No price alerts</h4>
+                  <p>Open any stock and tap “Set Alert” to get notified when it crosses a price.</p>
+                </div>
+              </td></tr>
+            )}
           </tbody>
         </table>
       </div>

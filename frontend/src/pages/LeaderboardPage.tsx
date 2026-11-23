@@ -17,10 +17,28 @@ export default function LeaderboardPage() {
   }, []);
 
   const medal = (rank: number) => rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+  const top3 = rows.slice(0, 3);
+  // Display order for the podium: 2nd, 1st, 3rd (classic podium layout).
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const classOf = (rank: number) => rank === 1 ? 'first' : rank === 2 ? 'second' : 'third';
 
   return (
     <div>
-      <h1 className="page-title">Paper Trading Leaderboard</h1>
+      <h1 className="page-title">Paper Trading Leaderboard <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: 14 }}>· ₹10,00,000 sandbox</span></h1>
+
+      {podiumOrder.length > 0 && (
+        <div className="podium">
+          {podiumOrder.map((e) => (
+            <div key={e.rank} className={`podium-card ${classOf(e.rank)}`}>
+              <div className="podium-medal">{medal(e.rank)}</div>
+              <div className="podium-name">{e.trader}</div>
+              <div className={`podium-return ${cls(e.returnPercent)}`}>{pct(e.returnPercent)}</div>
+              <div className="podium-value">{inr(e.totalValue)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="card" style={{ padding: 0 }}>
         <table>
           <thead>
@@ -33,10 +51,18 @@ export default function LeaderboardPage() {
                 <td style={{ fontWeight: 700 }}>{medal(r.rank)}</td>
                 <td>{r.trader}</td>
                 <td style={{ textAlign: 'right' }}>{inr(r.totalValue)}</td>
-                <td className={cls(r.returnPercent)} style={{ textAlign: 'right', fontWeight: 600 }}>{pct(r.returnPercent)}</td>
+                <td className={`${cls(r.returnPercent)}`} style={{ textAlign: 'right', fontWeight: 600 }}>{pct(r.returnPercent)}</td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={4} style={{ color: 'var(--text-dim)' }}>No paper traders yet. Start trading in the sandbox!</td></tr>}
+            {rows.length === 0 && (
+              <tr><td colSpan={4}>
+                <div className="empty-state">
+                  <div className="ico">🏆</div>
+                  <h4>No paper traders yet</h4>
+                  <p>Head to Paper Trading, make a few trades, and claim the top spot.</p>
+                </div>
+              </td></tr>
+            )}
           </tbody>
         </table>
       </div>
