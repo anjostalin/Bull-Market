@@ -31,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><span className="brand-text">Stock<span>Sim</span><span className="dot">.</span></span></div>
+        <div className="brand"><span className="brand-text">Bull<span>Market</span><span className="dot">.</span></span></div>
         {links.map((l) => (
           <NavLink key={l.to} to={l.to}
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

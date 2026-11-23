@@ -33,7 +33,7 @@ export default function VerifyPage() {
   return (
     <div className="auth2">
       <div className="auth2-brand">
-        <div className="auth2-logo">Stock<span>Sim</span> Pro<span className="dot">.</span></div>
+        <div className="auth2-logo">Bull<span>Market</span><span className="dot">.</span></div>
         <div className="auth2-hero">
           <h1>Almost there.</h1>
           <p>We're confirming your email so you can start trading right away.</p>

@@ -60,16 +60,10 @@ public class LiveQuoteService {
             if (!stock.isActive()) continue;
 
             // Always fetch the real price (Yahoo returns the latest / last close even when closed),
-            // so the app never shows stale seed prices.
+            // so the app never shows stale seed prices. fetchPrice also sets the real day high/low.
             BigDecimal fetched = fetchPrice(stock);
             if (fetched != null) {
                 stock.setCurrentPrice(fetched);
-                if (stock.getDayHigh() == null || fetched.compareTo(stock.getDayHigh()) > 0) {
-                    stock.setDayHigh(fetched);
-                }
-                if (stock.getDayLow() == null || fetched.compareTo(stock.getDayLow()) < 0) {
-                    stock.setDayLow(fetched);
-                }
                 touched.add(stock);
             }
 
@@ -105,6 +99,14 @@ public class LiveQuoteService {
             if (!prevNode.isMissingNode() && !prevNode.isNull()) {
                 stock.setPreviousClose(BigDecimal.valueOf(prevNode.asDouble()).setScale(2, RoundingMode.HALF_UP));
             }
+            // Use Yahoo's authoritative day high/low so the range reflects reality
+            // (not accumulated seed values). Fall back to the live price if absent.
+            JsonNode hi = meta.path("regularMarketDayHigh");
+            JsonNode lo = meta.path("regularMarketDayLow");
+            stock.setDayHigh(!hi.isMissingNode() && !hi.isNull() && hi.asDouble() > 0
+                    ? BigDecimal.valueOf(hi.asDouble()).setScale(2, RoundingMode.HALF_UP) : price);
+            stock.setDayLow(!lo.isMissingNode() && !lo.isNull() && lo.asDouble() > 0
+                    ? BigDecimal.valueOf(lo.asDouble()).setScale(2, RoundingMode.HALF_UP) : price);
             return price.signum() > 0 ? price : null;
         } catch (Exception e) {
             log.warn("Live quote fetch failed for {} ({}): {}", stock.getSymbol(), sym, e.getMessage());

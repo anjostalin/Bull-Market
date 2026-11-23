@@ -28,7 +28,7 @@ export default function RegisterPage() {
     <div className="auth2">
       {/* Left brand panel */}
       <div className="auth2-brand">
-        <div className="auth2-logo">Stock<span>Sim</span> Pro<span className="dot">.</span></div>
+        <div className="auth2-logo">Bull<span>Market</span><span className="dot">.</span></div>
 
         <div className="auth2-hero">
           <h1>Start trading<br />in minutes.</h1>
@@ -72,7 +72,7 @@ export default function RegisterPage() {
         <div className="auth2-form">
           <div className="head">
             <h2>Create your account</h2>
-            <p>Join StockSim Pro and start practicing today</p>
+            <p>Join Bull Market and start practicing today</p>
           </div>
 
           {error && <div className="auth2-error">{error}</div>}

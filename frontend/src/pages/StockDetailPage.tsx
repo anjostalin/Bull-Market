@@ -112,7 +112,7 @@ export default function StockDetailPage() {
 
             {/* Chart */}
             <div style={{ marginTop: 16 }}>
-              <PriceChart candles={candles} up={stock.changePercent >= 0} />
+              <PriceChart candles={candles} up={stock.changePercent >= 0} currency={cur} />
             </div>
 
             {/* Stat strip */}

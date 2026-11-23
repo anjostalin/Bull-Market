@@ -42,7 +42,7 @@ export default function LandingPage() {
   return (
     <div className="landing">
       <nav className="landing-nav">
-        <div className="landing-logo">Stock<span>Sim</span> Pro<span className="dot">.</span></div>
+        <div className="landing-logo">Bull<span>Market</span><span className="dot">.</span></div>
         <div className="landing-nav-actions">
           <button className="theme-toggle" onClick={toggle} aria-label="Toggle theme">
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -132,13 +132,13 @@ export default function LandingPage() {
 
       <section className="landing-closing">
         <h2>Ready to start trading?</h2>
-        <p>Join StockSim Pro and trade live Indian and US markets today.</p>
+        <p>Join Bull Market and trade live Indian and US markets today.</p>
         {!user && <Link to="/register" className="btn-lg btn-grad">Create your free account</Link>}
         {user && <Link to="/dashboard" className="btn-lg btn-grad">Go to Dashboard →</Link>}
       </section>
 
       <footer className="landing-foot">
-        StockSim Pro — live Indian &amp; US equity trading with real-time market data.
+        Bull Market — live Indian &amp; US equity trading with real-time market data.
       </footer>
     </div>
   );
